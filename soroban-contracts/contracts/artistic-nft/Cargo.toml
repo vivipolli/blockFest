@@ -10,6 +10,8 @@ doctest = false
 
 [dependencies]
 soroban-sdk = { workspace = true }
+stellar-non-fungible = { git = "https://github.com/OpenZeppelin/stellar-contracts" }
+
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
