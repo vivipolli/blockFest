@@ -1,0 +1,45 @@
+{
+  "name": "eventhub3",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "^1.7.3",
+    "@reown/walletkit": "^1.2.3",
+    "@stacks/common": "^7.0.2",
+    "@stacks/connect": "^8.1.6",
+    "@stacks/network": "^7.0.2",
+    "@stacks/transactions": "^7.0.5",
+    "@stellar/freighter-api": "^4.1.0",
+    "@stellar/stellar-sdk": "^13.1.0",
+    "@walletconnect/core": "^2.19.2",
+    "@walletconnect/utils": "^2.19.2",
+    "axios": "^1.8.3",
+    "bignumber.js": "^9.1.2",
+    "d3-geo": "^3.1.1",
+    "form-data": "^4.0.2",
+    "leaflet": "^1.9.4",
+    "next": "15.2.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
+    "react-leaflet": "^5.0.0",
+    "react-simple-maps": "^3.0.0",
+    "uuid": "^11.1.0",
+    "zustand": "^5.0.3"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/react": "19.0.10",
+    "eslint": "^9",
+    "eslint-config-next": "15.2.2",
+    "tailwindcss": "^4",
+    "typescript": "5.8.2"
+  }
+}

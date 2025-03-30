@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #080A0C;
+  --primary: #7D00FF;
+  --secondary: #00C8FF;
+  --accent: #00FF87;
+  --primary-dark: #6500cc;
+  --secondary-dark: #00a3d1;
+  --accent-dark: #00cc6e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #f8f9fa;
+    --foreground: #080A0C;
+    --primary: #7D00FF;
+    --secondary: #00C8FF;
+    --accent: #00FF87;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Utility classes for the neon colors */
+.text-primary { color: var(--primary); }
+.text-secondary { color: var(--secondary); }
+.text-accent { color: var(--accent); }
+
+.bg-primary { background-color: var(--primary); }
+.bg-secondary { background-color: var(--secondary); }
+.bg-accent { background-color: var(--accent); }
+.bg-dark { background-color: var(--foreground); }
+
+/* Neon glow effects */
+.glow-primary {
+  text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+}
+
+.glow-secondary {
+  text-shadow: 0 0 10px var(--secondary), 0 0 20px var(--secondary);
+}
+
+.glow-accent {
+  text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+}
+
+/* Box glow effects */
+.box-glow-primary {
+  box-shadow: 0 0 10px var(--primary), 0 0 20px rgba(125, 0, 255, 0.5);
+}
+
+.box-glow-secondary {
+  box-shadow: 0 0 10px var(--secondary), 0 0 20px rgba(0, 200, 255, 0.5);
+}
+
+.box-glow-accent {
+  box-shadow: 0 0 10px var(--accent), 0 0 20px rgba(0, 255, 135, 0.5);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@keyframes drawLine {
+  0% {
+    stroke-dashoffset: 100;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes pulseNode {
+  0% {
+    opacity: 0;
+    transform: scale(0) translate(-50%, -50%);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.1) translate(-45%, -45%);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%);
+  }
+}
+
+.animate-drawLine {
+  animation: drawLine 1.5s forwards;
+}
+
+.animate-pulseNode {
+  animation: pulseNode 0.5s forwards;
+}
+
+.bg-grid-pattern {
+  background-image: 
+    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}

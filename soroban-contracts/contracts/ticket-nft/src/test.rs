@@ -1,127 +1,192 @@
-#![cfg(test)]
-
-use super::*;
-use soroban_sdk::{testutils::Address as _, Env, String};
+use crate::{TicketNFT, TicketNFTClient};
+use soroban_sdk::{Env, String, Address};
+use soroban_sdk::testutils::{Address as _};
 
 #[test]
-fn test_ticket_nft_basic() {
+fn test_name() {
     let env = Env::default();
     let contract_id = env.register_contract(None, TicketNFT);
     let client = TicketNFTClient::new(&env, &contract_id);
-    
-    let admin = Address::generate(&env);
-    let user = Address::generate(&env);
-    
-    // Initialize contract with proper auth
-    env.mock_all_auths();
-    client.initialize(&admin);
-    
-    // Mint a ticket with proper auth
-    env.mock_all_auths();
-    let metadata_url = String::from_str(&env, "https://blockfest.io/events/123");
-    let ticket_id = client.mint_ticket(&user, &metadata_url);
-    
-    // Check ticket metadata
-    let ticket: Ticket = env.as_contract(&contract_id, || {
-        env.storage().persistent().get(&ticket_id).unwrap()
-    });
-    assert_eq!(ticket.owner, user);
-    assert_eq!(ticket.event_metadata_url, metadata_url);
-    assert_eq!(ticket.is_used, false);
-    
-    // Check NFT ownership
-    let owner = client.owner_of(&ticket_id);
-    assert_eq!(owner, user);
-    
-    // Check balance
-    let balance = client.balance(&user);
-    assert_eq!(balance, 1);
-    
-    // Use ticket with proper auth
-    env.mock_all_auths();
-    client.use_ticket(&ticket_id);
-    
-    // Check if ticket is used
-    let is_used = client.is_ticket_used(&ticket_id);
-    assert_eq!(is_used, true);
-    
-    // Transfer ticket with proper auth
-    let recipient = Address::generate(&env);
-    env.mock_all_auths();
-    client.transfer(&user, &recipient, &ticket_id);
-    
-    // Check new owner
-    let new_owner = client.owner_of(&ticket_id);
-    assert_eq!(new_owner, recipient);
-    
-    // Check updated balances
-    let user_balance = client.balance(&user);
-    let recipient_balance = client.balance(&recipient);
-    assert_eq!(user_balance, 0);
-    assert_eq!(recipient_balance, 1);
-    
-    // Test approvals with proper auth
-    let approved_user = Address::generate(&env);
-    let expiration_ledger = 100;
-    env.mock_all_auths();
-    client.approve(&recipient, &approved_user, &ticket_id, &expiration_ledger);
-    
-    let approved = client.get_approved(&ticket_id);
-    assert_eq!(approved, Some(approved_user));
-    
-    // Test enumeration
-    let total_supply = client.total_supply();
-    assert_eq!(total_supply, 1);
-    
-    let token_by_index = client.token_by_index(&0);
-    assert_eq!(token_by_index, ticket_id);
-    
-    // Test burning with proper auth
-    env.mock_all_auths();
-    client.burn(&recipient, &ticket_id);
-    
-    // After burning, total supply should be 0
-    let total_supply_after = client.total_supply();
-    assert_eq!(total_supply_after, 1); // Note: total_supply doesn't decrease after burning in this implementation
+    assert_eq!(client.name(), String::from_str(&env, "TicketNFT"));
 }
 
 #[test]
-fn test_multiple_tickets() {
+fn test_symbol() {
     let env = Env::default();
     let contract_id = env.register_contract(None, TicketNFT);
     let client = TicketNFTClient::new(&env, &contract_id);
-    
-    let admin = Address::generate(&env);
-    let user1 = Address::generate(&env);
-    let user2 = Address::generate(&env);
-    
-    // Initialize contract with proper auth
+    assert_eq!(client.symbol(), String::from_str(&env, "SBN"));
+}
+
+#[test]
+fn test_token_uri() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    assert_eq!(
+        client.token_uri(),
+        String::from_str(
+            &env,
+            "https://ipfs.io/ipfs/QmegWR31kiQcD9S2katTXKxracbAgLs2QLBRGruFW3NhXC"
+        )
+    );
+}
+
+#[test]
+fn test_token_image() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    assert_eq!(
+        client.token_image(),
+        String::from_str(
+            &env,
+            "https://ipfs.io/ipfs/QmeRHSYkR4aGRLQXaLmZiccwHw7cvctrB211DzxzuRiqW6"
+        )
+    );
+}
+
+#[test]
+fn test_mint() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let to = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
+    client.mint(&to, &metadata, &image);
+    let token_id: i128 = 1; // Since it's the first token minted
+    assert_eq!(client.owner_of(&token_id), to);
+    assert_eq!(client.token_uri(), metadata);
+    assert_eq!(client.token_image(), image);
+}
+
+#[test]
+fn test_owner_of() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    assert_eq!(client.owner_of(&token_id), owner);
+}
+
+#[test]
+fn test_transfer() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let to = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
     env.mock_all_auths();
-    client.initialize(&admin);
-    
-    // Mint tickets for different users with proper auth
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    client.transfer(&owner, &to, &token_id);
+    assert_eq!(client.owner_of(&token_id), to);
+}
+
+#[test]
+fn test_approve_and_is_approved() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let operator = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
     env.mock_all_auths();
-    let metadata_url1 = String::from_str(&env, "https://blockfest.io/events/123");
-    let metadata_url2 = String::from_str(&env, "https://blockfest.io/events/456");
-    
-    let ticket_id1 = client.mint_ticket(&user1, &metadata_url1);
-    
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    client.approve(&owner, &operator, &token_id);
+    assert!(client.is_approved(&operator, &token_id));
+}
+
+#[test]
+fn test_is_approved_false() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let operator = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    assert!(!client.is_approved(&operator, &token_id));
+}
+
+#[test]
+fn test_transfer_from() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let operator = Address::generate(&env);
+    let to = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
     env.mock_all_auths();
-    let ticket_id2 = client.mint_ticket(&user2, &metadata_url2);
-    
-    // Check total supply
-    let total_supply = client.total_supply();
-    assert_eq!(total_supply, 2);
-    
-    // Check individual ownership
-    let owner1 = client.owner_of(&ticket_id1);
-    let owner2 = client.owner_of(&ticket_id2);
-    assert_eq!(owner1, user1);
-    assert_eq!(owner2, user2);
-    
-    // Check balances
-    let balance1 = client.balance(&user1);
-    let balance2 = client.balance(&user2);
-    assert_eq!(balance1, 1);
-    assert_eq!(balance2, 1);
-} 
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    client.approve(&owner, &operator, &token_id);
+    client.transfer_from(&operator, &owner, &to, &token_id);
+    assert_eq!(client.owner_of(&token_id), to);
+}
+
+#[test]
+#[should_panic(expected = "Not the token owner")]
+fn test_transfer_not_owner() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let not_owner = Address::generate(&env);
+    let to = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
+    env.mock_all_auths();
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    client.transfer(&not_owner, &to, &token_id);
+}
+
+#[test]
+#[should_panic(expected = "Spender is not approved for this token")]
+fn test_transfer_from_not_approved() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let operator = Address::generate(&env);
+    let to = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
+    env.mock_all_auths();
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    client.transfer_from(&operator, &owner, &to, &token_id);
+}
+
+#[test]
+#[should_panic(expected = "From not owner")]
+fn test_transfer_from_wrong_owner() {
+    let env = Env::default();
+    let contract_id = env.register_contract(None, TicketNFT);
+    let client = TicketNFTClient::new(&env, &contract_id);
+    let owner = Address::generate(&env);
+    let wrong_owner = Address::generate(&env);
+    let operator = Address::generate(&env);
+    let to = Address::generate(&env);
+    let metadata = String::from_str(&env, "https://example.com/ticket/metadata/1");
+    let image = String::from_str(&env, "https://example.com/ticket/image/1");
+    env.mock_all_auths();
+    client.mint(&owner, &metadata, &image);
+    let token_id: i128 = 1;
+    client.approve(&owner, &operator, &token_id);
+    client.transfer_from(&operator, &wrong_owner, &to, &token_id);
+}

@@ -16,23 +16,24 @@ fn test_artistic_nft_basic() {
     env.mock_all_auths();
     client.initialize(&admin);
     
-    // Create event with proper auth
+    // Mint NFTs with proper auth
     env.mock_all_auths();
-    let art_metadata_url = String::from_str(&env, "https://blockfest.io/art/event123");
-    let event_id = client.create_event(&organizer, &art_metadata_url);
+    let event_id = String::from_str(&env, "event123");
+    let participant = Address::generate(&env);
+    let participants = vec![&env, participant.clone()];
     
-    // Enable minting with proper auth
-    env.mock_all_auths();
-    client.enable_minting(&event_id, &organizer);
+    let nft_ids = client.batch_mint(&event_id, &participants, &organizer);
     
-    // Check event info
-    let event_info: EventInfo = env.as_contract(&contract_id, || {
-        env.storage().persistent().get(&event_id).unwrap()
+    // Check NFT ownership
+    let owner = client.owner_of(&nft_ids.get(0).unwrap());
+    assert_eq!(owner, participant);
+    
+    // Check NFT metadata
+    let nft: ArtisticNFT = env.as_contract(&contract_id, || {
+        env.storage().persistent().get(&nft_ids.get(0).unwrap()).unwrap()
     });
-    assert_eq!(event_info.event_id, event_id);
-    assert_eq!(event_info.organizer, organizer);
-    assert_eq!(event_info.art_metadata_url, art_metadata_url);
-    assert_eq!(event_info.is_minting_enabled, true);
+    assert_eq!(nft.owner, participant);
+    assert_eq!(nft.event_id, event_id);
 }
 
 #[test]
@@ -50,17 +51,9 @@ fn test_batch_mint() {
     env.mock_all_auths();
     client.initialize(&admin);
     
-    // Create event with proper auth
-    env.mock_all_auths();
-    let art_metadata_url = String::from_str(&env, "https://blockfest.io/art/event123");
-    let event_id = client.create_event(&organizer, &art_metadata_url);
-    
-    // Enable minting with proper auth
-    env.mock_all_auths();
-    client.enable_minting(&event_id, &organizer);
-    
     // Batch mint NFTs with proper auth
     env.mock_all_auths();
+    let event_id = String::from_str(&env, "event123");
     let participants = vec![&env, participant1.clone(), participant2.clone()];
     let nft_ids = client.batch_mint(&event_id, &participants, &organizer);
     
@@ -84,8 +77,6 @@ fn test_batch_mint() {
     
     assert_eq!(nft1.event_id, event_id);
     assert_eq!(nft2.event_id, event_id);
-    assert_eq!(nft1.art_metadata_url, art_metadata_url);
-    assert_eq!(nft2.art_metadata_url, art_metadata_url);
 }
 
 #[test]
@@ -103,17 +94,9 @@ fn test_transfer_nft() {
     env.mock_all_auths();
     client.initialize(&admin);
     
-    // Create event with proper auth
-    env.mock_all_auths();
-    let art_metadata_url = String::from_str(&env, "https://blockfest.io/art/event123");
-    let event_id = client.create_event(&organizer, &art_metadata_url);
-    
-    // Enable minting with proper auth
-    env.mock_all_auths();
-    client.enable_minting(&event_id, &organizer);
-    
     // Mint a single NFT with proper auth
     env.mock_all_auths();
+    let event_id = String::from_str(&env, "event123");
     let participants = vec![&env, participant.clone()];
     let nft_ids = client.batch_mint(&event_id, &participants, &organizer);
     let nft_id = nft_ids.get(0).unwrap();
@@ -137,30 +120,4 @@ fn test_transfer_nft() {
     let recipient_balance = client.balance(&recipient);
     assert_eq!(participant_balance, 0);
     assert_eq!(recipient_balance, 1);
-}
-
-#[test]
-#[should_panic(expected = "minting not enabled for this event")]
-fn test_mint_before_enabling() {
-    let env = Env::default();
-    let contract_id = env.register_contract(None, ArtisticNFTContract);
-    let client = ArtisticNFTContractClient::new(&env, &contract_id);
-    
-    let admin = Address::generate(&env);
-    let organizer = Address::generate(&env);
-    let participant = Address::generate(&env);
-    
-    // Initialize contract with proper auth
-    env.mock_all_auths();
-    client.initialize(&admin);
-    
-    // Create event with proper auth
-    env.mock_all_auths();
-    let art_metadata_url = String::from_str(&env, "https://blockfest.io/art/event123");
-    let event_id = client.create_event(&organizer, &art_metadata_url);
-    
-    // Try to mint before enabling minting (should panic)
-    env.mock_all_auths();
-    let participants = vec![&env, participant.clone()];
-    client.batch_mint(&event_id, &participants, &organizer);
 } 

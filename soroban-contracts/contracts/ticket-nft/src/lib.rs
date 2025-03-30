@@ -1,174 +1,110 @@
 #![no_std]
-use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, String, Symbol};
 
-#[contracttype]
-#[derive(Clone)]
-pub struct Ticket {
-    owner: Address,
-    event_metadata_url: String,
-    is_used: bool,
-}
+use soroban_sdk::{contract, contractimpl, contracttype, symbol_short, Address, Bytes, String, Env, Vec};
 
 #[contract]
 pub struct TicketNFT;
 
+#[contracttype]
+pub enum DataKey {
+    Owner(i128),
+    TokenCount,
+    Approvals(i128),
+    Metadata,
+    Image,
+}
+
 #[contractimpl]
 impl TicketNFT {
-    pub fn initialize(env: Env, admin: Address) {
-        admin.require_auth();
-        env.storage().instance().set(&Symbol::new(&env, "ADMIN"), &admin);
-        env.storage().instance().set(&Symbol::new(&env, "next_token_id"), &0u32);
+    const SUPPLY: i128 = 1000;
+    const NAME: &'static str = "Ticket BlockFest";
+    const SYMBOL: &'static str = "TBF";
+
+    pub fn owner_of(env: Env, token_id: i128) -> Address {
+        env.storage().persistent().get(&DataKey::Owner(token_id)).unwrap_or_else(|| {
+            Address::from_string_bytes(&Bytes::from_slice(&env, &[0; 32]))
+        })
     }
 
-    // Função para criar um novo ticket
-    pub fn mint_ticket(env: Env, to: Address, event_metadata_url: String) -> u32 {
-        // Verifica se o chamador é o administrador
-        let admin: Address = env.storage().instance().get(&Symbol::new(&env, "ADMIN")).unwrap();
-        admin.require_auth();
-        
-        // Mint um novo token NFT
-        let token_id = mint_token(&env);
-        
-        // Armazena os metadados do ticket
-        let ticket = Ticket {
-            owner: to,
-            event_metadata_url,
-            is_used: false,
-        };
-        
-        env.storage().persistent().set(&token_id, &ticket);
-        
-        token_id
+    pub fn name(env: Env) -> String {
+        String::from_str(&env, Self::NAME)
     }
 
-    // Marca um ticket como usado
-    pub fn use_ticket(env: Env, ticket_id: u32) {
-        // Verifica se o chamador é o dono do ticket
-        let ticket: Ticket = env.storage().persistent().get(&ticket_id).unwrap();
-        ticket.owner.require_auth();
-        
-        // Verifica se o ticket já foi usado
-        if ticket.is_used {
-            panic!("Ticket already used");
-        }
-        
-        // Marca o ticket como usado
-        let updated_ticket = Ticket {
-            owner: ticket.owner,
-            event_metadata_url: ticket.event_metadata_url,
-            is_used: true,
-        };
-        
-        env.storage().persistent().set(&ticket_id, &updated_ticket);
+    pub fn symbol(env: Env) -> String {
+        String::from_str(&env, Self::SYMBOL)
     }
 
-    // Verifica se um ticket foi usado
-    pub fn is_ticket_used(env: Env, ticket_id: u32) -> bool {
-        let ticket: Ticket = env.storage().persistent().get(&ticket_id).unwrap();
-        ticket.is_used
+    pub fn token_uri(env: Env) -> String {
+        env.storage().persistent().get(&DataKey::Metadata).unwrap_or_else(|| String::from_str(&env, ""))
     }
-    
-    // Implementação das funções básicas de NFT
-    pub fn balance(env: Env, owner: Address) -> u32 {
-        let mut count = 0;
-        let total = TicketNFT::total_supply(env.clone());
-        
-        for i in 0..total {
-            let token_id = i;
-            if let Some(ticket) = env.storage().persistent().get::<u32, Ticket>(&token_id) {
-                if ticket.owner == owner {
-                    count += 1;
-                }
-            }
-        }
-        
-        count
+
+    pub fn token_image(env: Env) -> String {
+        env.storage().persistent().get(&DataKey::Image).unwrap_or_else(|| String::from_str(&env, ""))
     }
-    
-    pub fn owner_of(env: Env, token_id: u32) -> Address {
-        let ticket: Ticket = env.storage().persistent().get(&token_id).unwrap();
-        ticket.owner
+
+    pub fn is_approved(env: Env, operator: Address, token_id: i128) -> bool {
+        let key = DataKey::Approvals(token_id);
+        let approvals = env.storage().persistent().get::<DataKey, Vec<Address>>(&key).unwrap_or_else(|| Vec::new(&env));
+        approvals.contains(&operator)
     }
-    
-    pub fn transfer(env: Env, from: Address, to: Address, token_id: u32) {
-        from.require_auth();
-        
-        // Verifica se o remetente é o dono
-        let ticket: Ticket = env.storage().persistent().get(&token_id).unwrap();
-        if ticket.owner != from {
-            panic!("Not the owner");
-        }
-        
-        // Atualiza o proprietário nos metadados do ticket
-        let updated_ticket = Ticket {
-            owner: to,
-            event_metadata_url: ticket.event_metadata_url,
-            is_used: ticket.is_used,
-        };
-        
-        env.storage().persistent().set(&token_id, &updated_ticket);
-    }
-    
-    pub fn total_supply(env: Env) -> u32 {
-        env.storage().instance().get(&Symbol::new(&env, "next_token_id")).unwrap_or(0)
-    }
-    
-    pub fn token_by_index(env: Env, index: u32) -> u32 {
-        // Verifica se o índice é válido
-        let total = TicketNFT::total_supply(env.clone());
-        if index >= total {
-            panic!("Index out of bounds");
-        }
-        
-        // Retorna o token ID correspondente ao índice
-        // Nesta implementação simples, o índice é igual ao token ID
-        index
-    }
-    
-    pub fn approve(env: Env, owner: Address, approved: Address, token_id: u32, expiration_ledger: u32) {
+
+    pub fn transfer(env: Env, owner: Address, to: Address, token_id: i128) {
         owner.require_auth();
-        
-        // Verifica se o remetente é o dono
-        let ticket: Ticket = env.storage().persistent().get(&token_id).unwrap();
-        if ticket.owner != owner {
-            panic!("Not the owner");
+        let actual_owner = Self::owner_of(env.clone(), token_id);
+        if owner == actual_owner {
+            env.storage().persistent().set(&DataKey::Owner(token_id), &to);
+            env.storage().persistent().remove(&DataKey::Approvals(token_id));
+            env.events().publish((symbol_short!("Transfer"),), (owner, to, token_id));
+        } else {
+            panic!("Not the token owner");
         }
-        
-        // Armazena a aprovação usando o token_id como parte da chave
-        let approval_prefix = Symbol::new(&env, "approval");
-        let key = (approval_prefix.clone(), token_id);
-        env.storage().temporary().set(&key, &approved);
-        env.storage().temporary().extend_ttl(&key, expiration_ledger, expiration_ledger);
     }
-    
-    pub fn get_approved(env: Env, token_id: u32) -> Option<Address> {
-        let approval_prefix = Symbol::new(&env, "approval");
-        env.storage().temporary().get(&(approval_prefix, token_id))
-    }
-    
-    pub fn burn(env: Env, from: Address, token_id: u32) {
-        from.require_auth();
+
+    pub fn mint(env: Env, to: Address, metadata: String, image: String) {
+        let mut token_count: i128 = env.storage().persistent().get(&DataKey::TokenCount).unwrap_or(0);
+        assert!(token_count < Self::SUPPLY, "Maximum token supply reached");
+        token_count += 1;
+        env.storage().persistent().set(&DataKey::TokenCount, &token_count);
+        env.storage().persistent().set(&DataKey::Owner(token_count), &to);
         
-        // Verifica se o remetente é o dono
-        let ticket: Ticket = env.storage().persistent().get(&token_id).unwrap();
-        if ticket.owner != from {
-            panic!("Not the owner");
+        // Store metadata and image for this specific token
+        env.storage().persistent().set(&DataKey::Metadata, &metadata);
+        env.storage().persistent().set(&DataKey::Image, &image);
+        
+        env.events().publish((symbol_short!("Mint"),), (to, token_count));
+    }
+
+    pub fn approve(env: Env, owner: Address, to: Address, token_id: i128) {
+        owner.require_auth();
+        let actual_owner = Self::owner_of(env.clone(), token_id);
+        if owner == actual_owner {
+            let key = DataKey::Approvals(token_id);
+            let mut approvals = env.storage().persistent().get::<DataKey, Vec<Address>>(&key).unwrap_or_else(|| Vec::new(&env));
+            if !approvals.contains(&to) {
+                approvals.push_back(to.clone());
+                env.storage().persistent().set(&key, &approvals);
+                env.events().publish((symbol_short!("Approval"),), (owner, to, token_id));
+            }
+        } else {
+            panic!("Not the token owner");
         }
-        
-        // Remove o token
-        env.storage().persistent().remove(&token_id);
+    }
+
+    pub fn transfer_from(env: Env, spender: Address, from: Address, to: Address, token_id: i128) {
+        spender.require_auth();
+        let actual_owner = Self::owner_of(env.clone(), token_id);
+        if from != actual_owner {
+            panic!("From not owner");
+        }
+        let key = DataKey::Approvals(token_id);
+        let approvals = env.storage().persistent().get::<DataKey, Vec<Address>>(&key).unwrap_or_else(|| Vec::new(&env));
+        if !approvals.contains(&spender) {
+            panic!("Spender is not approved for this token");
+        }
+        env.storage().persistent().set(&DataKey::Owner(token_id), &to);
+        env.storage().persistent().remove(&DataKey::Approvals(token_id));
+        env.events().publish((symbol_short!("Transfer"),), (from, to, token_id));
     }
 }
 
-// Funções auxiliares internas
-fn mint_token(env: &Env) -> u32 {
-    // Obtém o próximo ID de token
-    let next_token_id: u32 = env.storage().instance().get(&Symbol::new(env, "next_token_id")).unwrap_or(0);
-    
-    // Incrementa o contador
-    env.storage().instance().set(&Symbol::new(env, "next_token_id"), &(next_token_id + 1));
-    
-    next_token_id
-}
-
-mod test; 
+//mod test;

@@ -1,17 +1,17 @@
 import { Buffer } from "buffer";
-import { Client as ContractClient, Spec as ContractSpec, } from '@stellar/stellar-sdk/contract';
-export * from '@stellar/stellar-sdk';
-export * as contract from '@stellar/stellar-sdk/contract';
-export * as rpc from '@stellar/stellar-sdk/rpc';
-if (typeof window !== 'undefined') {
+import { Client as ContractClient, Spec as ContractSpec, } from "@stellar/stellar-sdk/contract";
+export * from "@stellar/stellar-sdk";
+export * as contract from "@stellar/stellar-sdk/contract";
+export * as rpc from "@stellar/stellar-sdk/rpc";
+if (typeof window !== "undefined") {
     //@ts-ignore Buffer exists
     window.Buffer = window.Buffer || Buffer;
 }
 export const networks = {
     testnet: {
         networkPassphrase: "Test SDF Network ; September 2015",
-        contractId: "CB5ZAZ3DGWAUQVVZOOJM6EE6UQLRZLTL42A7ZIAKYSDDS6KF6GWXPM67",
-    }
+        contractId: "CBM4UPJOXAWI5PZEXSQHJFHVJO63LNE3IB44VDKU5J7JPQ57HPTFM2JN",
+    },
 };
 export const Errors = {};
 export class Client extends ContractClient {
@@ -22,21 +22,31 @@ export class Client extends ContractClient {
         return ContractClient.deploy(null, options);
     }
     constructor(options) {
-        super(new ContractSpec(["AAAAAQAAAAAAAAAAAAAABlRpY2tldAAAAAAABAAAAAAAAAASZXZlbnRfbWV0YWRhdGFfdXJsAAAAAAAQAAAAAAAAAAdpc191c2VkAAAAAAEAAAAAAAAABW93bmVyAAAAAAAAEwAAAAAAAAAJdGlja2V0X2lkAAAAAAAABg==",
-            "AAAAAAAAAAAAAAAKaW5pdGlhbGl6ZQAAAAAAAQAAAAAAAAAFYWRtaW4AAAAAAAATAAAAAA==",
-            "AAAAAAAAAAAAAAALbWludF90aWNrZXQAAAAABQAAAAAAAAACdG8AAAAAABMAAAAAAAAAEmV2ZW50X21ldGFkYXRhX3VybAAAAAAAEAAAAAAAAAAJb3JnYW5pemVyAAAAAAAAEwAAAAAAAAAFcHJpY2UAAAAAAAALAAAAAAAAAAh0b2tlbl9pZAAAABMAAAABAAAABg==",
-            "AAAAAAAAAAAAAAAKZ2V0X3RpY2tldAAAAAAAAQAAAAAAAAAJdGlja2V0X2lkAAAAAAAABgAAAAEAAAfQAAAABlRpY2tldAAA",
-            "AAAAAAAAAAAAAAAPdHJhbnNmZXJfdGlja2V0AAAAAAMAAAAAAAAABGZyb20AAAATAAAAAAAAAAJ0bwAAAAAAEwAAAAAAAAAJdGlja2V0X2lkAAAAAAAABgAAAAA=",
-            "AAAAAAAAAAAAAAAKdXNlX3RpY2tldAAAAAAAAgAAAAAAAAAJdGlja2V0X2lkAAAAAAAABgAAAAAAAAAEdXNlcgAAABMAAAAA",
-            "AAAAAAAAAAAAAAAOaXNfdGlja2V0X3VzZWQAAAAAAAEAAAAAAAAACXRpY2tldF9pZAAAAAAAAAYAAAABAAAAAQ=="]), options);
+        super(new ContractSpec([
+            "AAAAAgAAAAAAAAAAAAAAB0RhdGFLZXkAAAAABQAAAAEAAAAAAAAABU93bmVyAAAAAAAAAQAAAAsAAAAAAAAAAAAAAApUb2tlbkNvdW50AAAAAAABAAAAAAAAAAlBcHByb3ZhbHMAAAAAAAABAAAACwAAAAAAAAAAAAAACE1ldGFkYXRhAAAAAAAAAAAAAAAFSW1hZ2UAAAA=",
+            "AAAAAAAAAAAAAAAIb3duZXJfb2YAAAABAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAABAAAAEw==",
+            "AAAAAAAAAAAAAAAEbmFtZQAAAAAAAAABAAAAEA==",
+            "AAAAAAAAAAAAAAAGc3ltYm9sAAAAAAAAAAAAAQAAABA=",
+            "AAAAAAAAAAAAAAAJdG9rZW5fdXJpAAAAAAAAAAAAAAEAAAAQ",
+            "AAAAAAAAAAAAAAALdG9rZW5faW1hZ2UAAAAAAAAAAAEAAAAQ",
+            "AAAAAAAAAAAAAAALaXNfYXBwcm92ZWQAAAAAAgAAAAAAAAAIb3BlcmF0b3IAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAABAAAAAQ==",
+            "AAAAAAAAAAAAAAAIdHJhbnNmZXIAAAADAAAAAAAAAAVvd25lcgAAAAAAABMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAAA",
+            "AAAAAAAAAAAAAAAEbWludAAAAAMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAhtZXRhZGF0YQAAABAAAAAAAAAABWltYWdlAAAAAAAAEAAAAAA=",
+            "AAAAAAAAAAAAAAAHYXBwcm92ZQAAAAADAAAAAAAAAAVvd25lcgAAAAAAABMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAAA",
+            "AAAAAAAAAAAAAAANdHJhbnNmZXJfZnJvbQAAAAAAAAQAAAAAAAAAB3NwZW5kZXIAAAAAEwAAAAAAAAAEZnJvbQAAABMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAAA",
+        ]), options);
         this.options = options;
     }
     fromJSON = {
-        initialize: (this.txFromJSON),
-        mint_ticket: (this.txFromJSON),
-        get_ticket: (this.txFromJSON),
-        transfer_ticket: (this.txFromJSON),
-        use_ticket: (this.txFromJSON),
-        is_ticket_used: (this.txFromJSON)
+        owner_of: (this.txFromJSON),
+        name: (this.txFromJSON),
+        symbol: (this.txFromJSON),
+        token_uri: (this.txFromJSON),
+        token_image: (this.txFromJSON),
+        is_approved: (this.txFromJSON),
+        transfer: (this.txFromJSON),
+        mint: (this.txFromJSON),
+        approve: (this.txFromJSON),
+        transfer_from: (this.txFromJSON),
     };
 }

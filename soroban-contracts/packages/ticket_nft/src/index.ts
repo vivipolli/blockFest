@@ -1,5 +1,5 @@
 import { Buffer } from "buffer";
-import { Address } from '@stellar/stellar-sdk';
+import { Address } from "@stellar/stellar-sdk";
 import {
   AssembledTransaction,
   Client as ContractClient,
@@ -7,7 +7,7 @@ import {
   MethodOptions,
   Result,
   Spec as ContractSpec,
-} from '@stellar/stellar-sdk/contract';
+} from "@stellar/stellar-sdk/contract";
 import type {
   u32,
   i32,
@@ -20,61 +20,60 @@ import type {
   Option,
   Typepoint,
   Duration,
-} from '@stellar/stellar-sdk/contract';
-export * from '@stellar/stellar-sdk'
-export * as contract from '@stellar/stellar-sdk/contract'
-export * as rpc from '@stellar/stellar-sdk/rpc'
+} from "@stellar/stellar-sdk/contract";
+export * from "@stellar/stellar-sdk";
+export * as contract from "@stellar/stellar-sdk/contract";
+export * as rpc from "@stellar/stellar-sdk/rpc";
 
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   //@ts-ignore Buffer exists
   window.Buffer = window.Buffer || Buffer;
 }
 
-
 export const networks = {
   testnet: {
     networkPassphrase: "Test SDF Network ; September 2015",
-    contractId: "CB5ZAZ3DGWAUQVVZOOJM6EE6UQLRZLTL42A7ZIAKYSDDS6KF6GWXPM67",
-  }
-} as const
+    contractId: "CBM4UPJOXAWI5PZEXSQHJFHVJO63LNE3IB44VDKU5J7JPQ57HPTFM2JN",
+  },
+} as const;
 
+export type DataKey =
+  | { tag: "Owner"; values: readonly [i128] }
+  | { tag: "TokenCount"; values: void }
+  | { tag: "Approvals"; values: readonly [i128] }
+  | { tag: "Metadata"; values: void }
+  | { tag: "Image"; values: void };
 
-export interface Ticket {
-  event_metadata_url: string;
-  is_used: boolean;
-  owner: string;
-  ticket_id: u64;
-}
-
-export const Errors = {
-
-}
+export const Errors = {};
 
 export interface Client {
   /**
-   * Construct and simulate a initialize transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Construct and simulate a owner_of transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  initialize: ({admin}: {admin: string}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
+  owner_of: (
+    { token_id }: { token_id: i128 },
+    options?: {
+      /**
+       * The fee to pay for the transaction. Default: BASE_FEE
+       */
+      fee?: number;
 
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
+      /**
+       * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
+       */
+      timeoutInSeconds?: number;
 
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+      /**
+       * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
+       */
+      simulate?: boolean;
+    }
+  ) => Promise<AssembledTransaction<string>>;
 
   /**
-   * Construct and simulate a mint_ticket transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Construct and simulate a name transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  mint_ticket: ({to, event_metadata_url, organizer, price, token_id}: {to: string, event_metadata_url: string, organizer: string, price: i128, token_id: string}, options?: {
+  name: (options?: {
     /**
      * The fee to pay for the transaction. Default: BASE_FEE
      */
@@ -89,12 +88,12 @@ export interface Client {
      * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
      */
     simulate?: boolean;
-  }) => Promise<AssembledTransaction<u64>>
+  }) => Promise<AssembledTransaction<string>>;
 
   /**
-   * Construct and simulate a get_ticket transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Construct and simulate a symbol transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  get_ticket: ({ticket_id}: {ticket_id: u64}, options?: {
+  symbol: (options?: {
     /**
      * The fee to pay for the transaction. Default: BASE_FEE
      */
@@ -109,12 +108,12 @@ export interface Client {
      * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
      */
     simulate?: boolean;
-  }) => Promise<AssembledTransaction<Ticket>>
+  }) => Promise<AssembledTransaction<string>>;
 
   /**
-   * Construct and simulate a transfer_ticket transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Construct and simulate a token_uri transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  transfer_ticket: ({from, to, ticket_id}: {from: string, to: string, ticket_id: u64}, options?: {
+  token_uri: (options?: {
     /**
      * The fee to pay for the transaction. Default: BASE_FEE
      */
@@ -129,12 +128,12 @@ export interface Client {
      * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
      */
     simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  }) => Promise<AssembledTransaction<string>>;
 
   /**
-   * Construct and simulate a use_ticket transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Construct and simulate a token_image transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  use_ticket: ({ticket_id, user}: {ticket_id: u64, user: string}, options?: {
+  token_image: (options?: {
     /**
      * The fee to pay for the transaction. Default: BASE_FEE
      */
@@ -149,28 +148,127 @@ export interface Client {
      * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
      */
     simulate?: boolean;
-  }) => Promise<AssembledTransaction<null>>
+  }) => Promise<AssembledTransaction<string>>;
 
   /**
-   * Construct and simulate a is_ticket_used transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   * Construct and simulate a is_approved transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
    */
-  is_ticket_used: ({ticket_id}: {ticket_id: u64}, options?: {
-    /**
-     * The fee to pay for the transaction. Default: BASE_FEE
-     */
-    fee?: number;
+  is_approved: (
+    { operator, token_id }: { operator: string; token_id: i128 },
+    options?: {
+      /**
+       * The fee to pay for the transaction. Default: BASE_FEE
+       */
+      fee?: number;
 
-    /**
-     * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
-     */
-    timeoutInSeconds?: number;
+      /**
+       * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
+       */
+      timeoutInSeconds?: number;
 
-    /**
-     * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
-     */
-    simulate?: boolean;
-  }) => Promise<AssembledTransaction<boolean>>
+      /**
+       * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
+       */
+      simulate?: boolean;
+    }
+  ) => Promise<AssembledTransaction<boolean>>;
 
+  /**
+   * Construct and simulate a transfer transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  transfer: (
+    { owner, to, token_id }: { owner: string; to: string; token_id: i128 },
+    options?: {
+      /**
+       * The fee to pay for the transaction. Default: BASE_FEE
+       */
+      fee?: number;
+
+      /**
+       * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
+       */
+      timeoutInSeconds?: number;
+
+      /**
+       * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
+       */
+      simulate?: boolean;
+    }
+  ) => Promise<AssembledTransaction<null>>;
+
+  /**
+   * Construct and simulate a mint transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  mint: (
+    { to, metadata, image }: { to: string; metadata: string; image: string },
+    options?: {
+      /**
+       * The fee to pay for the transaction. Default: BASE_FEE
+       */
+      fee?: number;
+
+      /**
+       * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
+       */
+      timeoutInSeconds?: number;
+
+      /**
+       * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
+       */
+      simulate?: boolean;
+    }
+  ) => Promise<AssembledTransaction<null>>;
+
+  /**
+   * Construct and simulate a approve transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  approve: (
+    { owner, to, token_id }: { owner: string; to: string; token_id: i128 },
+    options?: {
+      /**
+       * The fee to pay for the transaction. Default: BASE_FEE
+       */
+      fee?: number;
+
+      /**
+       * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
+       */
+      timeoutInSeconds?: number;
+
+      /**
+       * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
+       */
+      simulate?: boolean;
+    }
+  ) => Promise<AssembledTransaction<null>>;
+
+  /**
+   * Construct and simulate a transfer_from transaction. Returns an `AssembledTransaction` object which will have a `result` field containing the result of the simulation. If this transaction changes contract state, you will need to call `signAndSend()` on the returned object.
+   */
+  transfer_from: (
+    {
+      spender,
+      from,
+      to,
+      token_id,
+    }: { spender: string; from: string; to: string; token_id: i128 },
+    options?: {
+      /**
+       * The fee to pay for the transaction. Default: BASE_FEE
+       */
+      fee?: number;
+
+      /**
+       * The maximum amount of time to wait for the transaction to complete. Default: DEFAULT_TIMEOUT
+       */
+      timeoutInSeconds?: number;
+
+      /**
+       * Whether to automatically simulate the transaction when constructing the AssembledTransaction. Default: true
+       */
+      simulate?: boolean;
+    }
+  ) => Promise<AssembledTransaction<null>>;
 }
 export class Client extends ContractClient {
   static async deploy<T = Client>(
@@ -185,26 +283,36 @@ export class Client extends ContractClient {
         format?: "hex" | "base64";
       }
   ): Promise<AssembledTransaction<T>> {
-    return ContractClient.deploy(null, options)
+    return ContractClient.deploy(null, options);
   }
   constructor(public readonly options: ContractClientOptions) {
     super(
-      new ContractSpec([ "AAAAAQAAAAAAAAAAAAAABlRpY2tldAAAAAAABAAAAAAAAAASZXZlbnRfbWV0YWRhdGFfdXJsAAAAAAAQAAAAAAAAAAdpc191c2VkAAAAAAEAAAAAAAAABW93bmVyAAAAAAAAEwAAAAAAAAAJdGlja2V0X2lkAAAAAAAABg==",
-        "AAAAAAAAAAAAAAAKaW5pdGlhbGl6ZQAAAAAAAQAAAAAAAAAFYWRtaW4AAAAAAAATAAAAAA==",
-        "AAAAAAAAAAAAAAALbWludF90aWNrZXQAAAAABQAAAAAAAAACdG8AAAAAABMAAAAAAAAAEmV2ZW50X21ldGFkYXRhX3VybAAAAAAAEAAAAAAAAAAJb3JnYW5pemVyAAAAAAAAEwAAAAAAAAAFcHJpY2UAAAAAAAALAAAAAAAAAAh0b2tlbl9pZAAAABMAAAABAAAABg==",
-        "AAAAAAAAAAAAAAAKZ2V0X3RpY2tldAAAAAAAAQAAAAAAAAAJdGlja2V0X2lkAAAAAAAABgAAAAEAAAfQAAAABlRpY2tldAAA",
-        "AAAAAAAAAAAAAAAPdHJhbnNmZXJfdGlja2V0AAAAAAMAAAAAAAAABGZyb20AAAATAAAAAAAAAAJ0bwAAAAAAEwAAAAAAAAAJdGlja2V0X2lkAAAAAAAABgAAAAA=",
-        "AAAAAAAAAAAAAAAKdXNlX3RpY2tldAAAAAAAAgAAAAAAAAAJdGlja2V0X2lkAAAAAAAABgAAAAAAAAAEdXNlcgAAABMAAAAA",
-        "AAAAAAAAAAAAAAAOaXNfdGlja2V0X3VzZWQAAAAAAAEAAAAAAAAACXRpY2tldF9pZAAAAAAAAAYAAAABAAAAAQ==" ]),
+      new ContractSpec([
+        "AAAAAgAAAAAAAAAAAAAAB0RhdGFLZXkAAAAABQAAAAEAAAAAAAAABU93bmVyAAAAAAAAAQAAAAsAAAAAAAAAAAAAAApUb2tlbkNvdW50AAAAAAABAAAAAAAAAAlBcHByb3ZhbHMAAAAAAAABAAAACwAAAAAAAAAAAAAACE1ldGFkYXRhAAAAAAAAAAAAAAAFSW1hZ2UAAAA=",
+        "AAAAAAAAAAAAAAAIb3duZXJfb2YAAAABAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAABAAAAEw==",
+        "AAAAAAAAAAAAAAAEbmFtZQAAAAAAAAABAAAAEA==",
+        "AAAAAAAAAAAAAAAGc3ltYm9sAAAAAAAAAAAAAQAAABA=",
+        "AAAAAAAAAAAAAAAJdG9rZW5fdXJpAAAAAAAAAAAAAAEAAAAQ",
+        "AAAAAAAAAAAAAAALdG9rZW5faW1hZ2UAAAAAAAAAAAEAAAAQ",
+        "AAAAAAAAAAAAAAALaXNfYXBwcm92ZWQAAAAAAgAAAAAAAAAIb3BlcmF0b3IAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAABAAAAAQ==",
+        "AAAAAAAAAAAAAAAIdHJhbnNmZXIAAAADAAAAAAAAAAVvd25lcgAAAAAAABMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAAA",
+        "AAAAAAAAAAAAAAAEbWludAAAAAMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAhtZXRhZGF0YQAAABAAAAAAAAAABWltYWdlAAAAAAAAEAAAAAA=",
+        "AAAAAAAAAAAAAAAHYXBwcm92ZQAAAAADAAAAAAAAAAVvd25lcgAAAAAAABMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAAA",
+        "AAAAAAAAAAAAAAANdHJhbnNmZXJfZnJvbQAAAAAAAAQAAAAAAAAAB3NwZW5kZXIAAAAAEwAAAAAAAAAEZnJvbQAAABMAAAAAAAAAAnRvAAAAAAATAAAAAAAAAAh0b2tlbl9pZAAAAAsAAAAA",
+      ]),
       options
-    )
+    );
   }
   public readonly fromJSON = {
-    initialize: this.txFromJSON<null>,
-        mint_ticket: this.txFromJSON<u64>,
-        get_ticket: this.txFromJSON<Ticket>,
-        transfer_ticket: this.txFromJSON<null>,
-        use_ticket: this.txFromJSON<null>,
-        is_ticket_used: this.txFromJSON<boolean>
-  }
+    owner_of: this.txFromJSON<string>,
+    name: this.txFromJSON<string>,
+    symbol: this.txFromJSON<string>,
+    token_uri: this.txFromJSON<string>,
+    token_image: this.txFromJSON<string>,
+    is_approved: this.txFromJSON<boolean>,
+    transfer: this.txFromJSON<null>,
+    mint: this.txFromJSON<null>,
+    approve: this.txFromJSON<null>,
+    transfer_from: this.txFromJSON<null>,
+  };
 }
