@@ -80,7 +80,7 @@ export async function POST(request) {
           source: issuerKeypair.publicKey(),
         })
       )
-      .setTimeout(30)
+      .setTimeout(100)
       .build();
 
     transaction.sign(issuerKeypair);

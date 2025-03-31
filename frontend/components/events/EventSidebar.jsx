@@ -33,7 +33,7 @@ export default function EventSidebar({ event, handleRegister, handleShareClick, 
                                 onClick={handleRegister}
                                 className="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
                             >
-                                'Register Now'
+                                Get Ticket
                             </button>
                         }
                     </div>

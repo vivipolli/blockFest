@@ -4,6 +4,8 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import NftCard from '@/components/nft/NftCard';
 import { toast, Toaster } from 'react-hot-toast';
+import nftService from '@/services/nftService';
+import { useWallet } from '@/hooks/useWallet';
 
 // Sample user data - in a real app, this would come from an API
 const userData = {
@@ -26,32 +28,37 @@ const userData = {
 };
 
 export default function ProfilePage({ params }) {
-    const { id } = use(params);
+    // Unwrap params using React.use()
+    const unwrappedParams = use(params);
+    const { id } = unwrappedParams;
+
     const [isFollowing, setIsFollowing] = useState(false);
     const [activeTab, setActiveTab] = useState('collected');
     const [userNFTs, setUserNFTs] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { address } = useWallet();
 
     useEffect(() => {
-        const userAddress = id.startsWith('ST')
-            ? id
-            : 'ST2K82ZG0VDAZPMMRDXMPHZQP732Y2S7A004HTETD';
+        if (!address) return;
 
         const loadNFTs = async () => {
             setIsLoading(true);
             try {
-                //const nfts = await getNftsForAddress(userAddress);
-                //setUserNFTs(nfts);
-                console.log('userAddress', userAddress);
+                console.log('Fetching NFTs for address:', address);
+                const nfts = await nftService.fetchNftData(address);
+                console.log('NFTs loaded:', nfts);
+                setUserNFTs(nfts);
             } catch (error) {
                 console.error('Error loading NFTs:', error);
+                toast.error('Failed to load NFTs');
+                setUserNFTs([]);
             } finally {
                 setIsLoading(false);
             }
         };
 
         loadNFTs();
-    }, [id]);
+    }, [id, address]);
 
     const isValidTokenUri = (uri) => {
         return uri && (uri.startsWith('http://') || uri.startsWith('https://'));
@@ -59,6 +66,7 @@ export default function ProfilePage({ params }) {
 
     return (
         <div className="min-h-screen bg-gray-50">
+            <Toaster />
             {/* Cover Image */}
             <div className="h-64 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 relative">
                 <div className="absolute inset-0 bg-grid-pattern opacity-30"></div>
@@ -197,12 +205,14 @@ export default function ProfilePage({ params }) {
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                                 <p className="mt-4 text-gray-600">Loading NFTs...</p>
                             </div>
-                        ) : userNFTs.filter(nft => isValidTokenUri(nft.tokenUri)).length > 0 ? (
-                            userNFTs
-                                .filter(nft => isValidTokenUri(nft.tokenUri))
-                                .map(nft => (
-                                    <NftCard key={nft.value.repr.replace('u', '')} tokenUri={nft.tokenUri} tx_id={nft.tx_id || nft.txid} />
-                                ))
+                        ) : userNFTs && userNFTs.length > 0 ? (
+                            userNFTs.map((nft, index) => (
+                                <NftCard
+                                    key={nft.tx_id || index}
+                                    tokenUri={nft.tokenUri}
+                                    tx_id={nft.tx_id}
+                                />
+                            ))
                         ) : (
                             <div className="col-span-3 text-center py-12 text-gray-500">
                                 No NFTs found for this user

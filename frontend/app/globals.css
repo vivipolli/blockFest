@@ -5,10 +5,10 @@
   --foreground: #080A0C;
   --primary: #7D00FF;
   --secondary: #00C8FF;
-  --accent: #00FF87;
+  --accent: #FFBB45;
   --primary-dark: #6500cc;
   --secondary-dark: #00a3d1;
-  --accent-dark: #00cc6e;
+  --accent-dark: #e6a835;
 }
 
 @theme inline {
@@ -27,7 +27,7 @@
     --foreground: #080A0C;
     --primary: #7D00FF;
     --secondary: #00C8FF;
-    --accent: #00FF87;
+    --accent: #FFBB45;
   }
 }
 

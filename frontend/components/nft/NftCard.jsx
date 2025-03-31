@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { convertIpfsUrl } from '@/utils/ipfs';
 
-export default function NftCard({ tokenUri, tx_id }) {
+export default function NftCard({ tokenUri, tx_id, metadata }) {
     const [nftData, setNftData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -12,6 +12,26 @@ export default function NftCard({ tokenUri, tx_id }) {
             try {
                 setLoading(true);
                 setError(null);
+
+                if (metadata) {
+                    let imageUrl = metadata.image;
+                    if (imageUrl) {
+                        imageUrl = convertIpfsUrl(imageUrl);
+                    }
+
+                    setNftData({
+                        name: metadata.name,
+                        image: imageUrl,
+                        description: metadata.description
+                    });
+                    setLoading(false);
+                    return;
+                }
+
+                if (!tokenUri) {
+                    throw new Error('No token URI or metadata provided');
+                }
+
                 const response = await fetch(tokenUri);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
 
@@ -24,21 +44,31 @@ export default function NftCard({ tokenUri, tx_id }) {
                 setNftData({
                     name: nftMetadata.name,
                     image: imageUrl,
+                    description: nftMetadata.description
                 });
                 setLoading(false);
             } catch (error) {
+                console.error('Error loading NFT:', error);
                 setError('Failed to load NFT');
                 setLoading(false);
             }
         };
 
-        if (tokenUri) loadNftData();
-    }, [tokenUri]);
+        loadNftData();
+    }, [tokenUri, metadata]);
 
     if (loading) {
         return (
             <div className="bg-white rounded-lg shadow-md p-4 h-64 flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-white rounded-lg shadow-md p-4 h-64 flex items-center justify-center">
+                <div className="text-red-500">{error}</div>
             </div>
         );
     }
@@ -62,14 +92,9 @@ export default function NftCard({ tokenUri, tx_id }) {
 
             <div className="p-4">
                 <h3 className="text-lg font-semibold mb-3">{nftData?.name || 'Unnamed NFT'}</h3>
-                <a
-                    href={`https://explorer.hiro.so/txid/${tx_id}?chain=testnet`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-purple-600 hover:text-purple-800"
-                >
-                    View on Explorer
-                </a>
+                {nftData?.description && (
+                    <p className="text-sm text-gray-600 mb-3">{nftData.description}</p>
+                )}
             </div>
         </div>
     );
