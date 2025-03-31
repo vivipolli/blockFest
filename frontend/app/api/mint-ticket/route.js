@@ -47,7 +47,7 @@ export async function POST(request) {
         Operation.manageData({
           name: "ipfshash",
           value: metadataCID,
-          source: issuerKeypair.publicKey(),
+          source: userPublicKey,
         })
       )
       // Begin sponsoring future reserves for the user
@@ -73,7 +73,7 @@ export async function POST(request) {
       )
       // Send the NFT to the user
       .addOperation(
-        Operation.payment({
+        Operation.payment({issuerKeypair
           destination: userPublicKey,
           asset: nftAsset,
           amount: "0.0000001",

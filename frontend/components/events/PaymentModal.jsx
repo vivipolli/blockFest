@@ -109,8 +109,6 @@ export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
             setTicketId(tokenId);
             setMetadataUri(metadataURL);
 
-
-
             toast.success('Ticket minted successfully!', { id: 'mint-toast' });
 
             if (onSuccess) {
@@ -142,50 +140,72 @@ export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Complete Your Purchase">
-            <div className="space-y-6">
-                <div className="bg-gray-50 p-4 rounded-xl">
-                    <h3 className="font-medium text-lg mb-2">{event?.name}</h3>
-                    <div className="flex justify-between text-sm">
-                        <span>Price:</span>
-                        <span className="font-medium">{event?.price} XLM</span>
+            <div className="space-y-6 p-2 md:p-4">
+                <div className="bg-gray-50 p-6 rounded-xl shadow-sm">
+                    <h3 className="font-semibold text-lg mb-3">{event?.name}</h3>
+                    <div className="flex justify-between items-center">
+                        <span className="text-gray-600">Price:</span>
+                        <span className="font-medium text-lg text-primary">{event?.price} XLM</span>
                     </div>
+                    {event?.date && (
+                        <div className="flex justify-between items-center mt-2">
+                            <span className="text-gray-600">Date:</span>
+                            <span className="text-sm">{event?.date}</span>
+                        </div>
+                    )}
+                    {event?.location && (
+                        <div className="flex justify-between items-center mt-2">
+                            <span className="text-gray-600">Location:</span>
+                            <span className="text-sm">{event?.location}</span>
+                        </div>
+                    )}
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 text-red-700 p-4 rounded-xl text-sm">
+                    <div className="bg-red-50 text-red-700 p-5 rounded-xl text-sm border border-red-100">
+                        <div className="font-medium mb-1">Error</div>
                         {error}
                     </div>
                 )}
 
                 {ticketId ? (
-                    <div className="bg-green-50 p-4 rounded-xl">
-                        <h3 className="font-medium text-green-700 mb-2">Success!</h3>
-                        <p className="text-sm mb-2">
+                    <div className="bg-green-50 p-6 rounded-xl border border-green-100">
+                        <h3 className="font-medium text-green-700 mb-3">Success!</h3>
+                        <p className="text-sm mb-4">
                             Your ticket has been minted and added to your wallet.
                         </p>
-                        <div className="text-xs text-gray-500">
-                            <div>Ticket ID: {ticketId.toString()}</div>
-                            {transactionId && <div>Transaction: {transactionId}</div>}
+                        <div className="text-xs bg-white p-3 rounded-lg border border-green-100 font-mono">
+                            <div className="mb-2">
+                                <span className="text-gray-500">Ticket ID:</span>
+                                <span className="ml-2">{ticketId.toString()}</span>
+                            </div>
+                            {transactionId && (
+                                <div>
+                                    <span className="text-gray-500">Transaction:</span>
+                                    <span className="ml-2 break-all">{transactionId}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : transactionId ? (
-                    <div className="bg-blue-50 p-4 rounded-xl">
-                        <h3 className="font-medium text-blue-700 mb-2">Payment Confirmed</h3>
-                        <p className="text-sm mb-2">
+                    <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                        <h3 className="font-medium text-blue-700 mb-3">Payment Confirmed</h3>
+                        <p className="text-sm mb-4">
                             Your payment has been confirmed. Minting your ticket...
                         </p>
-                        <div className="text-xs text-gray-500">
-                            Transaction: {transactionId}
+                        <div className="text-xs bg-white p-3 rounded-lg border border-blue-100 font-mono">
+                            <span className="text-gray-500">Transaction:</span>
+                            <span className="ml-2 break-all">{transactionId}</span>
                         </div>
                     </div>
                 ) : null}
 
-                <div className="flex flex-col space-y-3">
+                <div className="flex flex-col space-y-4 mt-6">
                     {!ticketId && (
                         <button
                             onClick={handlePayment}
                             disabled={isProcessing}
-                            className="w-full py-3 px-4 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                            className="w-full py-3 px-6 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed shadow-sm"
                         >
                             {isProcessing ? 'Processing...' : 'Pay with Stellar Wallet'}
                         </button>
@@ -194,7 +214,7 @@ export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
                     {transactionStarted && !transactionId && (
                         <button
                             onClick={handleManualTxId}
-                            className="text-sm text-primary hover:underline"
+                            className="text-sm text-primary hover:underline text-center"
                         >
                             I've already paid. Enter transaction ID manually.
                         </button>
@@ -203,7 +223,7 @@ export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
                     {ticketId && (
                         <button
                             onClick={onClose}
-                            className="w-full py-3 px-4 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-colors"
+                            className="w-full py-3 px-6 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-colors shadow-sm"
                         >
                             Close
                         </button>
