@@ -45,7 +45,7 @@ export async function POST(request) {
       // Add the NFT metadata to the issuer account using a `manageData` operation.
       .addOperation(
         Operation.manageData({
-          name: "ipfshash",
+          name: `NFT_${nftAsset.getCode()}_ipfs`,
           value: metadataCID,
           source: userPublicKey,
         })
@@ -73,7 +73,7 @@ export async function POST(request) {
       )
       // Send the NFT to the user
       .addOperation(
-        Operation.payment({issuerKeypair
+        Operation.payment({
           destination: userPublicKey,
           asset: nftAsset,
           amount: "0.0000001",
