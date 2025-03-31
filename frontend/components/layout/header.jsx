@@ -23,12 +23,12 @@ export default function Header() {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
           <Link href="/" className="flex items-center">
-            <div className="relative mr-2">
+            <div className="relative mr-2" width={60} height={60}>
               <Image
                 src="/logo.png"
                 alt="Event3 Logo"
-                width={140}
-                height={140}
+                width={60}
+                height={60}
                 className="object-contain"
               />
             </div>

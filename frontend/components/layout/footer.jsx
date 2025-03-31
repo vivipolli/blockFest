@@ -14,7 +14,7 @@ export default function Footer() {
                                     <span className="text-primary font-bold text-xl">E3</span>
                                 </div>
                             </div>
-                            <span className="text-foreground font-bold text-xl">EventHub3</span>
+                            <span className="text-foreground font-bold text-xl">BlockFest</span>
                         </Link>
                         <p className="text-gray-600 mb-6 max-w-sm">
                             Revolutionizing events with blockchain technology. Connect, collect, and build your digital identity through unique experiences.
@@ -128,7 +128,7 @@ export default function Footer() {
                 <div className="mt-12 pt-8 border-t border-gray-100">
                     <div className="flex flex-col md:flex-row justify-between items-center">
                         <p className="text-gray-500 text-sm">
-                            © {new Date().getFullYear()} EventHub3. All rights reserved.
+                            © {new Date().getFullYear()} BlockFest. All rights reserved.
                         </p>
                         <div className="flex items-center space-x-4 mt-4 md:mt-0">
                             <Link href="/terms" className="text-sm text-gray-500 hover:text-primary transition-colors">

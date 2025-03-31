@@ -16,15 +16,15 @@ export default function AboutPage() {
     // FAQ data
     const faqs = [
         {
-            question: "What is EventHub3?",
-            answer: "EventHub3 is a Web3 platform that revolutionizes event management and attendance through blockchain technology. We provide a seamless way for organizers to create events with NFT tickets and certificates, while attendees can collect and showcase their event experiences as digital assets."
+            question: "What is BlockFest?",
+            answer: "BlockFest is a Web3 platform that revolutionizes event management and attendance through blockchain technology. We provide a seamless way for organizers to create events with NFT tickets and certificates, while attendees can collect and showcase their event experiences as digital assets."
         },
         {
             question: "How do NFT tickets work?",
             answer: "NFT tickets are unique digital assets stored on the blockchain. When you purchase a ticket, you receive an NFT that serves as your entry pass. This NFT can also function as a collectible, proof of attendance, and may include special perks or access determined by the event organizer."
         },
         {
-            question: "Do I need a crypto wallet to use EventHub3?",
+            question: "Do I need a crypto wallet to use BlockFest?",
             answer: "Yes, you'll need a compatible crypto wallet to interact with our platform. We support various wallets including MetaMask, Hiro Wallet, and others. The wallet allows you to purchase tickets, store your NFTs, and interact with the blockchain aspects of our platform."
         },
         {
@@ -32,8 +32,8 @@ export default function AboutPage() {
             answer: "Yes, one of the benefits of NFT tickets is that they can be transferred or resold. However, event organizers may set specific rules or royalties for secondary sales. All transactions are transparent on the blockchain, reducing fraud and unauthorized reselling."
         },
         {
-            question: "What blockchain does EventHub3 use?",
-            answer: "EventHub3 is built on the Stacks blockchain, which provides security, scalability, and low transaction costs while leveraging Bitcoin's security. This ensures your digital assets are secure and transactions are reliable."
+            question: "What blockchain does BlockFest use?",
+            answer: "BlockFest is built on the Stacks blockchain, which provides security, scalability, and low transaction costs while leveraging Bitcoin's security. This ensures your digital assets are secure and transactions are reliable."
         },
         {
             question: "How do I create an event as an organizer?",
@@ -46,7 +46,7 @@ export default function AboutPage() {
             {/* Hero Section */}
             <section className="bg-gradient-to-r from-primary to-secondary text-white py-20">
                 <div className="container mx-auto px-6 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-6">About EventHub3</h1>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-6">About BlockFest</h1>
                     <p className="text-xl max-w-3xl mx-auto">
                         Revolutionizing the event industry with blockchain technology and NFTs,
                         creating unforgettable experiences and lasting digital memories.
@@ -61,7 +61,7 @@ export default function AboutPage() {
                         <div>
                             <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
                             <p className="text-gray-600 mb-6">
-                                At EventHub3, we're on a mission to transform how people experience events in the digital age.
+                                At BlockFest, we're on a mission to transform how people experience events in the digital age.
                                 By leveraging blockchain technology, we're creating a more transparent, secure, and
                                 engaging platform for event organizers and attendees alike.
                             </p>
@@ -75,7 +75,7 @@ export default function AboutPage() {
                             <div className="relative h-80 w-full">
                                 <Image
                                     src="/event1.png"
-                                    alt="EventHub3 Mission"
+                                    alt="BlockFest Mission"
                                     fill
                                     className="object-cover"
                                 />
@@ -102,7 +102,7 @@ export default function AboutPage() {
                 <div className="container mx-auto px-6 text-center">
                     <h2 className="text-3xl font-bold mb-6">Get In Touch</h2>
                     <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-                        Have questions or want to learn more about EventHub3? We'd love to hear from you!
+                        Have questions or want to learn more about BlockFest? We'd love to hear from you!
                     </p>
                     <Link
                         href="/contact"
