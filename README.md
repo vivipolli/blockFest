@@ -1,6 +1,6 @@
 # BlockFest - Decentralized Event Ticketing on Stellar
 
-![BlockFest Logo](public/logo.png)
+![BlockFest Logo](frontend/public/logo.png)
 
 ## Project Overview 🌟
 
@@ -8,15 +8,13 @@ BlockFest is a decentralized event ticketing platform built on the Stellar block
 
 ### Problem Statement
 
-The traditional event ticketing industry faces several challenges:
+The event ticketing for blockchain-based events faces several challenges that traditional platforms do not adequately address:
 
-1. **Ticket Fraud**: Counterfeit tickets and scams are prevalent in the secondary market
-2. **Scalping**: Automated bots purchase tickets in bulk for resale at inflated prices
-3. **Lack of Transparency**: Limited visibility into ticket authenticity and transaction history
-4. **Limited Engagement**: Few opportunities for ongoing connection between organizers and attendees
-5. **High Fees**: Centralized platforms charge substantial fees to both organizers and attendees
+1. **Limited Visibility**: Many blockchain events are poorly or narrowly marketed, remaining accessible only to closed groups or niche communities.
+2. **Lack of Cryptocurrency Integration**: There are no robust platforms that allow for the purchase of tickets directly using cryptocurrencies, limiting access for crypto enthusiasts and reducing potential engagement.
+3. **High Fees**: Centralized platforms charge substantial fees, which can be a significant burden for events operating within the blockchain ecosystem.
 
-BlockFest leverages Stellar's fast, low-cost blockchain infrastructure to create a transparent, secure, and engaging ticketing ecosystem that benefits both event organizers and attendees.
+BlockFest leverages Stellar's fast, low-cost blockchain infrastructure to create a transparent, secure, and engaging ticketing ecosystem that benefits both event organizers and attendees. By issuing tickets as NFTs, we ensure each ticket's authenticity and offer a new way for attendees to interact with the event beyond just attendance.
 
 ## Features ✨
 
@@ -27,47 +25,43 @@ BlockFest leverages Stellar's fast, low-cost blockchain infrastructure to create
 
 ## Technical Architecture 🏗️
 
-BlockFest is built using a modern tech stack that leverages the power of Stellar blockchain:
+BlockFest is built using a comprehensive tech stack that leverages the power of the Stellar blockchain, ensuring seamless integration and functionality across both client and server sides:
 
-### Frontend
+### Technologies and Libraries
 
-- **Next.js**: React framework for server-rendered applications
-- **TailwindCSS**: Utility-first CSS framework for rapid UI development
-- **React Query**: Data fetching and state management
-- **Stellar Wallets Kit**: Integration with multiple Stellar wallets (Freighter, Albedo, xBull, WalletConnect)
+- **Next.js**: A React framework for building user interfaces, used for both rendering server-side pages and managing backend API routes.
+- **Stellar SDK**: A JavaScript library that facilitates interaction with the Stellar network, used for creating and managing transactions and querying network data.
+- **Stellar Wallets Kit**: Integrates with multiple Stellar wallets, including Freighter, Albedo, xBull, and WalletConnect, to provide users with secure and versatile wallet options.
+- **IPFS/Pinata**: Utilized for decentralized storage of NFT metadata, ensuring data integrity and availability without reliance on centralized storage solutions.
+- **Horizon**: The client-facing API server for the Stellar ecosystem, which allows interaction with the Stellar network to submit transactions, check account status, and subscribe to events.
 
-### Backend
+### Architecture Overview
 
-- **Next.js API Routes**: Serverless functions for backend operations
-- **Stellar SDK**: JavaScript library for interacting with the Stellar network
-- **IPFS/Pinata**: Decentralized storage for NFT metadata
-
-### Blockchain
-
-- **Stellar Network**: Fast, low-cost blockchain infrastructure
-- **Stellar Asset Issuance**: Creating and managing NFT tickets as Stellar assets
-- **Stellar Smart Contracts**: For advanced ticketing features and marketplace functionality
-
-### Architecture Diagram
+The architecture of BlockFest is designed to leverage these technologies to create a robust, scalable, and secure platform for decentralized event ticketing:
 
 ```
-┌───────────────────┐      ┌───────────────────┐      ┌───────────────────┐
-│                   │      │                   │      │                   │
-│     Frontend      │      │      Backend      │      │     Blockchain    │
-│                   │      │                   │      │                   │
-│  ┌─────────────┐  │      │  ┌─────────────┐  │      │  ┌─────────────┐  │
-│  │   Next.js   │──┼──────┼─▶│  API Routes │──┼──────┼─▶│   Stellar   │  │
-│  └─────────────┘  │      │  └─────────────┘  │      │  │   Network   │  │
-│         │         │      │         │         │      │  └─────────────┘  │
-│         ▼         │      │         ▼         │      │         ▲         │
-│  ┌─────────────┐  │      │  ┌─────────────┐  │      │         │         │
-│  │   Wallet    │  │      │  │    IPFS     │  │      │         │         │
-│  │ Integration │  │      │  │   Storage   │  │      │         │         │
-│  └─────────────┘  │      │  └─────────────┘  │      │         │         │
-│         │         │      │                   │      │         │         │
-└─────────┼─────────┘      └───────────────────┘      └─────────┼─────────┘
-          │                                                      │
-          └──────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────┐
+│                                                                        │
+│                                BlockFest                               │
+│                                                                        │
+│  ┌─────────────────────┐       ┌─────────────────────┐                 │
+│  │     Frontend UI     │       │      Backend API     │                 │
+│  │  (Next.js + React)  │       │     (Next.js API)    │                 │
+│  └─────────────────────┘       └─────────────────────┘                 │
+│           │                          │                                │
+│           ▼                          ▼                                │
+│  ┌─────────────────────┐       ┌─────────────────────┐                 │
+│  │   Stellar Wallets   │       │     Stellar SDK     │                 │
+│  │       Kit           │       │  & Horizon Server   │                 │
+│  └─────────────────────┘       └─────────────────────┘                 │
+│           │                          │                                │
+│           ▼                          ▼                                │
+│  ┌─────────────────────┐       ┌─────────────────────┐                 │
+│  │   IPFS/Pinata for   │       │   Transaction and   │                 │
+│  │   Metadata Storage  │       │   Data Management   │                 │
+│  └─────────────────────┘       └─────────────────────┘                 │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Implementation Details 💻
@@ -125,10 +119,27 @@ const kit = new StellarWalletsKit({
 
 ### Transaction Signing Flow
 
-1. Backend prepares the transaction and signs with the issuer key
-2. Frontend receives the transaction XDR
-3. User signs the transaction using their wallet
-4. Signed transaction is submitted to the Stellar network
+The transaction signing and submission process involves several steps to ensure the secure minting and transfer of NFT tickets on the Stellar network:
+
+1. **Backend Preparation**: The backend prepares the transaction, which includes several operations:
+
+   - **Manage Data**: Adds NFT metadata to the issuer's account.
+   - **Begin Sponsorship**: Starts sponsoring future reserves for the user.
+   - **Create Trustline**: Establishes a trustline for the NFT asset, which is sponsored.
+   - **End Sponsorship**: Ends the sponsorship of reserves.
+   - **Send NFT**: Transfers the NFT to the user's account.
+
+2. **Transaction Signing**:
+
+   - The transaction is first signed by the issuer's keypair on the backend.
+   - The transaction XDR (Transaction Descriptor Record) is then sent to the frontend.
+
+3. **User Signature**:
+
+   - The user signs the transaction using their wallet through the frontend interface, facilitated by the Stellar Wallets Kit.
+
+4. **Submit to Stellar Network**:
+   - The fully signed transaction is submitted to the Stellar network via Horizon.
 
 ```javascript
 // Backend prepares and signs transaction
@@ -154,16 +165,9 @@ We chose Stellar for BlockFest for several key reasons:
 
 1. **Low Transaction Costs**: Stellar's minimal fees (0.00001 XLM per operation) make it economically viable for ticketing
 2. **Fast Finality**: Transactions confirm in 3-5 seconds, providing immediate ticket delivery
-3. **Built-in Asset Issuance**: Native support for creating custom assets, perfect for NFT tickets
-4. **Scalability**: Capable of handling 1000+ transactions per second, suitable for high-demand ticket sales
-5. **Energy Efficiency**: Stellar's consensus protocol is environmentally friendly compared to proof-of-work blockchains
-
-### Why Next.js?
-
-1. **Server-Side Rendering**: Improves SEO and initial load performance
-2. **API Routes**: Simplifies backend development with serverless functions
-3. **React Integration**: Leverages the robust React ecosystem
-4. **TypeScript Support**: Enhances code quality and developer experience
+3. **Scalability**: Capable of handling 1000+ transactions per second, suitable for high-demand ticket sales
+4. **Energy Efficiency**: Stellar's consensus protocol is environmentally friendly compared to proof-of-work blockchains
+5. **Community Support**: Stellar has a strong and active developer community, providing extensive resources and support
 
 ### Why IPFS/Pinata for Metadata?
 
@@ -193,8 +197,8 @@ Our team is new to Stellar development:
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/yourusername/blockfest.git
-cd blockfest
+git clone https://github.com/vivipolli/blockFest.git
+cd blockFest
 ```
 
 2. Install dependencies:
@@ -206,26 +210,21 @@ yarn install
 ```
 
 3. Configure environment variables:
-   Create a `.env.local` file with the following variables:
+   Create a `.env` file with the following variables:
 
 ```
 # Pinata Configuration (for IPFS storage)
-NEXT_PUBLIC_PINATA_API_KEY=your_pinata_api_key
-NEXT_PUBLIC_PINATA_SECRET_API_KEY=your_pinata_secret_key
+NEXT_PUBLIC_PINATA_API_KEY=
+NEXT_PUBLIC_PINATA_SECRET_API_KEY=
 
-# Stellar Configuration
+# Stellar Soroban Configuration
+NEXT_PUBLIC_SECRET_KEY=
 NEXT_PUBLIC_NETWORK_PASSPHRASE="Test SDF Network ; September 2015"
 NEXT_PUBLIC_SOROBAN_RPC_URL=https://soroban-testnet.stellar.org
-NEXT_PUBLIC_HORIZON_URL=https://horizon-testnet.stellar.org
 
 # Wallet Connect Configuration
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_wallet_connect_project_id
-
-# Admin/Issuer Account (only for development)
-NEXT_PUBLIC_ADMIN_PUBLIC_KEY=your_admin_public_key
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=
 ```
-
-> **Note**: Never commit your `.env.local` file or expose secret keys in public repositories.
 
 ### Running the Application
 
@@ -274,10 +273,6 @@ For testing the platform, you can use these credentials:
 - **Multi-chain Support**: Expanding beyond Stellar to support other blockchain networks
 - **DAO Governance**: Implementing decentralized autonomous organization features for community-driven event management
 
-## Contributing 🤝
-
-We welcome contributions to BlockFest! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get involved.
-
 ## License 📄
 
 BlockFest is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -287,3 +282,7 @@ BlockFest is licensed under the MIT License - see the [LICENSE](LICENSE) file fo
 - Stellar Development Foundation for their amazing blockchain platform
 - The open-source community for their invaluable tools and libraries
 - All hackathon organizers and participants for their support and feedback
+
+## Storage Considerations
+
+Currently, non-sensitive data such as NFT ticket information is stored in the browser's localStorage for quick access. This is a temporary solution, and future implementations will migrate this storage to a secure database to enhance data integrity and security.

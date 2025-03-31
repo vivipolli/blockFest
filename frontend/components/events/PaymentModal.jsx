@@ -65,7 +65,7 @@ export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
                     setPaymentComplete(true);
 
                     // Mint the ticket NFT
-                    await handleMint(address, paymentResult.hash);
+                    const result = await handleMint(address, paymentResult.hash);
                 } else {
                     throw new Error('No transaction hash returned');
                 }

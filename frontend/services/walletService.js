@@ -42,7 +42,7 @@ class WalletService {
           new LedgerModule(),
           new WalletConnectModule({
             url: "http://localhost:3000",
-            projectId: "d79649a45778ed581062dfcf835242b7",
+            projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
             method: WalletConnectAllowedMethods.SIGN,
             description: `BlockFest is a platform for creating and managing Events NFTs on the Stellar blockchain.`,
             name: "BlockFest",

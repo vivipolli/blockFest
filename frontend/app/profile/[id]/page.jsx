@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import NftCard from '@/components/nft/NftCard';
 import { toast, Toaster } from 'react-hot-toast';

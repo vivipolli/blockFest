@@ -80,11 +80,6 @@ export default function EventPage({ params }) {
     };
 
     const handleRegister = () => {
-        if (!isConnected) {
-            router.push('/login?redirect=' + encodeURIComponent(`/events/${eventId}`));
-            return;
-        }
-
         if (event.isPaid) {
             setShowPaymentModal(true);
         } else {
@@ -94,7 +89,6 @@ export default function EventPage({ params }) {
 
     const handlePaymentSuccess = () => {
         toast.success('NFT Ticket minted successfully!');
-        //router.push('/my-profile?tab=tickets');
     };
 
     const handleRegistrationSuccess = () => {
@@ -119,6 +113,7 @@ export default function EventPage({ params }) {
                         handleRegister={handleRegister}
                         handleShareClick={handleShareClick}
                         router={router}
+                        isConnected={isConnected}
                     />
                 </div>
             </div>

@@ -1,6 +1,6 @@
 import EventOrganizer from "./EventOrganizer";
 
-export default function EventSidebar({ event, handleRegister, handleShareClick, router }) {
+export default function EventSidebar({ event, handleRegister, handleShareClick, router, isConnected }) {
     return (
         <div className="lg:w-96">
             <div className="sticky top-6 space-y-6">
@@ -27,13 +27,15 @@ export default function EventSidebar({ event, handleRegister, handleShareClick, 
                             <p className="text-sm text-gray-600">Spots Available</p>
                             <p className="font-medium">{event.spotsLeft} spots left</p>
                         </div>
+                        {isConnected &&
 
-                        <button
-                            onClick={handleRegister}
-                            className="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
-                        >
-                            Register Now
-                        </button>
+                            <button
+                                onClick={handleRegister}
+                                className="w-full py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors"
+                            >
+                                'Register Now'
+                            </button>
+                        }
                     </div>
                 </div>
 

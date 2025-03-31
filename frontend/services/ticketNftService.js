@@ -50,6 +50,14 @@ class TicketNftService {
 
       console.log("Mint successful:", { ...data, transactionResult: result });
 
+      const existingTickets =
+        JSON.parse(localStorage.getItem("nftTicket")) || [];
+      existingTickets.push({
+        eventInfo: data.metadata,
+        transactionHash: result.hash,
+      });
+      localStorage.setItem("nftTicket", JSON.stringify(existingTickets));
+
       return {
         ...data,
         transactionResult: result,

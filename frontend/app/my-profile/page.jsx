@@ -4,10 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useWallet } from '@/hooks/useWallet';
 import { toast, Toaster } from 'react-hot-toast';
-import NftCard from '@/components/nft/NftCard';
-import { isValidIpfsUrl } from '@/utils/ipfs';
+import { isValidIpfsUrl, convertIpfsUrl } from '@/utils/ipfs';
 import TicketCard from '@/components/tickets/TicketCard';
-import ticketNftService from '@/services/ticketNftService';
 
 const organizedEvents = [
     {
@@ -37,12 +35,12 @@ export default function MyProfilePage() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [isProfileLoading, setIsProfileLoading] = useState(true);
-    const [nfts, setNfts] = useState([]);
     const [tickets, setTickets] = useState([]);
-    const [isTicketsLoading, setIsTicketsLoading] = useState(false);
+    const [isTicketsLoading, setIsTicketsLoading] = useState(true);
+    const [nftMetadata, setNftMetadata] = useState({});
+    const [isNftLoading, setIsNftLoading] = useState({});
 
     useEffect(() => {
-        // Load profile data from localStorage if available
         setIsProfileLoading(true);
         const savedProfileData = localStorage.getItem('user_profile_data');
         if (savedProfileData) {
@@ -50,28 +48,28 @@ export default function MyProfilePage() {
         }
         setIsProfileLoading(false);
 
-        const fetchUserTickets = async () => {
-            if (isConnected && address) {
-                try {
-                    setIsTicketsLoading(true);
+        const loadTickets = async () => {
+            try {
+                const storedTickets = localStorage.getItem('nftTicket');
+                if (storedTickets) {
+                    const parsedTickets = JSON.parse(storedTickets);
+                    setTickets(parsedTickets);
 
-                    // Get all tickets owned by the connected address
-                    const userTickets = await ticketNftService.getTicketsForAddress(address);
-
-                    setTickets(userTickets);
-                    setIsTicketsLoading(false);
-                } catch (error) {
-                    console.error('Error fetching tickets:', error);
-                    toast.error('Error loading tickets');
-                    setIsTicketsLoading(false);
+                    // Iniciar carregamento de metadados para tickets confirmados
+                    const confirmedTickets = parsedTickets.filter(ticket => ticket.confirmed);
+                    confirmedTickets.forEach(ticket => {
+                        fetchTicketMetadata(ticket.transactionHash, ticket.eventInfo);
+                    });
                 }
-            } else {
+            } catch (error) {
+                console.error('Error loading tickets:', error);
+            } finally {
                 setIsTicketsLoading(false);
             }
         };
 
-        fetchUserTickets();
-    }, [address, isConnected]);
+        loadTickets();
+    }, []);
 
     const truncateAddress = (address) => {
         if (!address) return '';
@@ -98,29 +96,56 @@ export default function MyProfilePage() {
         setIsEditing(false);
     };
 
+    const fetchTicketMetadata = async (ticketId, eventInfo) => {
+        setIsNftLoading(prev => ({ ...prev, [ticketId]: true }));
+
+        try {
+            const uri = convertIpfsUrl(eventInfo);
+            const response = await fetch(uri);
+            if (!response.ok) throw new Error('Failed to fetch metadata');
+            const data = await response.json();
+
+            setNftMetadata(prev => ({
+                ...prev,
+                [ticketId]: data
+            }));
+        } catch (error) {
+            console.error('Error fetching metadata:', error);
+            setNftMetadata(prev => ({
+                ...prev,
+                [ticketId]: null
+            }));
+        } finally {
+            setIsNftLoading(prev => ({ ...prev, [ticketId]: false }));
+        }
+    };
+
     const handleConfirmPresence = async (ticketId) => {
         try {
             if ("geolocation" in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     async (position) => {
-                        const { latitude, longitude } = position.coords;
-
-                        // Use the ticket
-                        const useTicketPromise = ticketNftService.useTicket(ticketId);
-
-                        await toast.promise(
-                            useTicketPromise,
-                            {
-                                loading: 'Confirming presence...',
-                                success: 'Presence confirmed! Ticket has been used.',
-                                error: 'Failed to confirm presence. Please try again.',
+                        // Update the ticket list to mark the ticket as confirmed
+                        const updatedTickets = tickets.map(ticket => {
+                            if (ticket.transactionHash === ticketId) {
+                                return { ...ticket, confirmed: true };
                             }
-                        );
+                            return ticket;
+                        });
+                        setTickets(updatedTickets);
+                        localStorage.setItem('nftTicket', JSON.stringify(updatedTickets));
 
+                        // Buscar metadados para o ticket recém-confirmado
+                        const confirmedTicket = updatedTickets.find(t => t.transactionHash === ticketId);
+                        if (confirmedTicket) {
+                            fetchTicketMetadata(ticketId, confirmedTicket.eventInfo);
+                        }
+
+                        toast.success('Presença confirmada com sucesso!');
                     },
                     (error) => {
                         console.error('Geolocation error:', error);
-                        toast.error('Please enable location services to confirm presence');
+                        toast.error('Por favor, habilite os serviços de localização para confirmar presença');
                     },
                     {
                         enableHighAccuracy: true,
@@ -129,11 +154,11 @@ export default function MyProfilePage() {
                     }
                 );
             } else {
-                toast.error('Geolocation is not supported by your browser');
+                toast.error('Geolocalização não é suportada pelo seu navegador');
             }
         } catch (error) {
             console.error('Confirm presence error:', error);
-            toast.error('Failed to confirm presence');
+            toast.error('Falha ao confirmar presença');
         }
     };
 
@@ -339,11 +364,11 @@ export default function MyProfilePage() {
                             </div>
                         ) : tickets.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {tickets.map((ticket) => (
+                                {tickets.map((ticket, index) => (
                                     <TicketCard
-                                        key={ticket.id.toString()}
+                                        key={ticket.transactionHash || index}
                                         ticket={ticket}
-                                        onConfirmPresence={() => handleConfirmPresence(ticket.id)}
+                                        onConfirmPresence={() => handleConfirmPresence(ticket.transactionHash)}
                                     />
                                 ))}
                             </div>
@@ -419,26 +444,63 @@ export default function MyProfilePage() {
                 {activeTab === 'nfts' && (
                     <div className="space-y-6">
                         <h2 className="text-xl font-bold mb-6">Your NFT Collection</h2>
-                        {isLoading ? (
+                        {isTicketsLoading ? (
                             <div className="text-center py-12">
                                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
                                 <p className="mt-4 text-gray-600">Loading your NFTs...</p>
                             </div>
-                        ) : nfts.filter(nft => nft.tokenUri && isValidIpfsUrl(nft.tokenUri)).length > 0 ? (
+                        ) : tickets.filter(ticket => ticket.confirmed).length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {nfts
-                                    .filter(nft => nft.tokenUri && isValidIpfsUrl(nft.tokenUri))
-                                    .map((nft) => (
-                                        <NftCard
-                                            key={nft.value.repr.replace('u', '')}
-                                            tokenUri={nft.tokenUri}
-                                            tx_id={nft.tx_id || nft.txid}
-                                        />
-                                    ))}
+                                {tickets
+                                    .filter(ticket => ticket.confirmed)
+                                    .map((ticket, index) => {
+                                        const ticketId = ticket.transactionHash;
+                                        const isLoading = isNftLoading[ticketId];
+                                        const metadata = nftMetadata[ticketId];
+
+                                        if (isLoading) {
+                                            return (
+                                                <div key={ticketId || index} className="bg-white rounded-xl shadow-sm p-6 flex justify-center items-center">
+                                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                                                </div>
+                                            );
+                                        }
+
+                                        if (!metadata) {
+                                            return (
+                                                <div key={ticketId || index} className="bg-white rounded-xl shadow-sm p-6">
+                                                    <p className="text-red-500">Failed to load NFT data</p>
+                                                </div>
+                                            );
+                                        }
+
+                                        return (
+                                            <div key={ticketId || index} className="bg-white rounded-xl shadow-sm overflow-hidden">
+                                                {metadata.image && (
+                                                    <img
+                                                        src={metadata.image.startsWith('ipfs://') ? convertIpfsUrl(metadata.image) : metadata.image}
+                                                        alt={metadata.name || 'NFT'}
+                                                        className="w-full h-48 object-cover"
+                                                    />
+                                                )}
+                                                <div className="p-4">
+                                                    <h3 className="text-lg font-bold">{metadata.name}</h3>
+                                                    <p className="text-gray-600">{metadata.description}</p>
+                                                    <div className="mt-4 flex flex-wrap gap-2">
+                                                        {metadata.attributes && metadata.attributes.map((attr, i) => (
+                                                            <span key={i} className="inline-block bg-gray-100 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">
+                                                                {attr.trait_type}: {attr.value}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                             </div>
                         ) : (
                             <div className="text-center py-12 text-gray-500 bg-white rounded-xl shadow-sm">
-                                <p className="mb-4">You don't have any NFTs yet</p>
+                                <p className="mb-4">You don't have any confirmed NFTs yet</p>
                                 <p className="text-sm">Attend events and confirm your presence to collect NFTs</p>
                             </div>
                         )}
