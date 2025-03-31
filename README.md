@@ -173,11 +173,11 @@ We chose Stellar for BlockFest for several key reasons:
 
 ## Team Experience with Stellar 👨‍💻
 
-Our team has extensive experience with Stellar development:
+Our team is new to Stellar development:
 
-- **Previous Projects**: Developed multiple applications using Stellar's asset issuance and payment capabilities
-- **Community Involvement**: Active participation in Stellar's developer community and hackathons
-- **Technical Expertise**: Deep understanding of Stellar's transaction model, operations, and best practices
+- **Previous Projects**: This is our first project utilizing Stellar's capabilities.
+- **Community Involvement**: We are eager to engage more with the Stellar developer community and participate in future hackathons.
+- **Technical Expertise**: We are currently learning about Stellar's transaction model, operations, and best practices.
 
 ## Deployment and Testing Instructions 🚀
 
@@ -258,13 +258,21 @@ For testing the platform, you can use these credentials:
 - **Test User Account**:
   - Create your own using Stellar Laboratory or any Stellar wallet
 
-## Future Roadmap 🗺️
+## Future Implementations 🚀
 
-- **Secondary Market**: Implement a secure P2P marketplace for ticket resale
-- **Event Check-in System**: QR code scanning for event entry verification
-- **Loyalty Programs**: Reward systems for frequent event attendees
-- **Multi-chain Support**: Expand to other blockchain networks
-- **Mobile Application**: Native mobile apps for iOS and Android
+### Short-term Improvements
+
+- **Enhanced UI/UX**: Improved interface design and user experience features
+- **Centralized Database Integration**: Adding database support to store event details and user preferences
+- **NFT Marketplace Integration**: Implementing a marketplace with contract functionality for collection NFT issuance
+- **Social Login**: Adding the ability to log in with social media accounts
+- **Follow Functionality**: Enabling users to follow event organizers and other attendees
+
+### Long-term Vision
+
+- **Decentralized Social Features**: Building a fully decentralized social layer for greater interaction between participants
+- **Multi-chain Support**: Expanding beyond Stellar to support other blockchain networks
+- **DAO Governance**: Implementing decentralized autonomous organization features for community-driven event management
 
 ## Contributing 🤝
 
