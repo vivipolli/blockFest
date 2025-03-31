@@ -5792,6 +5792,20 @@ stable-hash@^0.0.4:
   resolved "https://registry.yarnpkg.com/stable-hash/-/stable-hash-0.0.4.tgz#55ae7dadc13e4b3faed13601587cec41859b42f7"
   integrity sha512-LjdcbuBeLcdETCrPn9i8AYAZ1eCtu4ECAWtP7UleOiZ9LzVxRzzUZEoZ8zB24nhkQnDWyET0I+3sWokSDS3E7g==
 
+stellar-sdk@^13.1.0:
+  version "13.1.0"
+  resolved "https://registry.yarnpkg.com/stellar-sdk/-/stellar-sdk-13.1.0.tgz#8ec7aa5646baf09bb87dc7e46a9164cd3c1c9863"
+  integrity sha512-b7fYK9kX4ljulXckt63jSwzAzTW43RlitSIJH4CHTft7Fce8zNqWuNwJ29FALt258SKlxiL0qKn58LcOA9iJIw==
+  dependencies:
+    "@stellar/stellar-base" "^13.0.1"
+    axios "^1.7.9"
+    bignumber.js "^9.1.2"
+    eventsource "^2.0.2"
+    feaxios "^0.0.23"
+    randombytes "^2.1.0"
+    toml "^3.0.0"
+    urijs "^1.19.1"
+
 stream-browserify@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/stream-browserify/-/stream-browserify-3.0.0.tgz#22b0a2850cdf6503e73085da1fc7b7d0c2122f2f"

@@ -8,6 +8,7 @@ import * as StellarSdk from "@stellar/stellar-sdk";
 export function parseTransactionEvents(resultMetaXdr) {
   try {
     const events = resultMetaXdr.v3().sorobanMeta().events();
+    console.log("Events:", events);
     const parsedEvents = [];
 
     for (let i = 0; i < events.length; i++) {

@@ -34,3 +34,31 @@ export function convertIpfsUrl(ipfsUrl) {
 
   return ipfsUrl;
 }
+
+export function extractCIDFromURL(url) {
+  if (!url) return null;
+
+  // Se a URL começa com ipfs://, extrair diretamente
+  if (url.startsWith("ipfs://")) {
+    return url.replace("ipfs://", "");
+  }
+
+  // Para URLs HTTP(S) com /ipfs/
+  if (url.includes("/ipfs/")) {
+    const parts = url.split("/ipfs/");
+    if (parts.length > 1) {
+      const cidWithPath = parts[1];
+      return cidWithPath.split("/")[0].split("?")[0];
+    }
+  }
+
+  const ipfsSubdomainMatch = url.match(
+    /https:\/\/([a-z0-9]+)\.ipfs\.[a-zA-Z0-9.]+/
+  );
+  if (ipfsSubdomainMatch && ipfsSubdomainMatch[1]) {
+    return ipfsSubdomainMatch[1];
+  }
+
+  console.warn("Não foi possível extrair o CID da URL:", url);
+  return url;
+}

@@ -5,7 +5,6 @@ import {
   WalletNetwork,
   XBULL_ID,
   xBullModule,
-  allowAllModules,
 } from "@creit.tech/stellar-wallets-kit";
 
 import {
@@ -15,7 +14,8 @@ import {
 import { LedgerModule } from "@creit.tech/stellar-wallets-kit/modules/ledger.module";
 import useWalletStore from "../store/walletStore";
 
-import { rpc as StellarRpc } from "@stellar/stellar-sdk";
+import { TransactionBuilder } from "@stellar/stellar-sdk";
+import { Horizon } from "@stellar/stellar-sdk";
 
 class WalletService {
   constructor() {
@@ -140,10 +140,15 @@ class WalletService {
     this.initialize();
 
     try {
+      // Assume que `this.kit` é uma instância de uma carteira que pode assinar transações
+      // e que já está inicializada e conectada.
+      const networkPassphrase =
+        process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ||
+        "Test SDF Network ; September 2015";
+
+      // Assina a transação usando a carteira conectada e a passphrase da rede
       const { signedTxXdr } = await this.kit.signTransaction(xdr, {
-        networkPassphrase:
-          process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ||
-          "Test SDF Network ; September 2015",
+        networkPassphrase: networkPassphrase,
       });
 
       return signedTxXdr;
@@ -316,9 +321,48 @@ class WalletService {
       throw error;
     }
   }
+
+  async completeTransaction(transactionXDR) {
+    if (!this.isConnected || !this.address) {
+      throw new Error("Wallet not connected");
+    }
+
+    this.initialize();
+
+    try {
+      const transaction = TransactionBuilder.fromXDR(
+        transactionXDR,
+        process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ||
+          "Test SDF Network ; September 2015"
+      );
+
+      const { signedTxXdr } = await this.kit.signTransaction(transactionXDR, {
+        networkPassphrase:
+          process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ||
+          "Test SDF Network ; September 2015",
+      });
+
+      const server = new Horizon.Server(
+        process.env.NEXT_PUBLIC_HORIZON_URL ||
+          "https://horizon-testnet.stellar.org"
+      );
+
+      const result = await server.submitTransaction(
+        TransactionBuilder.fromXDR(
+          signedTxXdr,
+          process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE ||
+            "Test SDF Network ; September 2015"
+        )
+      );
+
+      return result;
+    } catch (error) {
+      console.error("Error completing transaction:", error);
+      throw error;
+    }
+  }
 }
 
-// Create a singleton instance
 const walletService = new WalletService();
 
 export default walletService;

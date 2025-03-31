@@ -1,101 +1,103 @@
 import { NextResponse } from "next/server";
 import {
   Keypair,
-  Contract,
-  rpc as StellarRpc,
+  Asset,
   TransactionBuilder,
   Networks,
+  Operation,
   BASE_FEE,
 } from "@stellar/stellar-sdk";
-import * as StellarSdk from "@stellar/stellar-sdk";
-import {
-  parseTransactionEvents,
-  findTokenIdInMintEvent,
-} from "../soroban-utils";
+
+import { Horizon } from "@stellar/stellar-sdk";
+
+import { extractCIDFromURL } from "@/utils/ipfs";
 
 const ADMIN_SECRET_KEY = process.env.NEXT_PUBLIC_SECRET_KEY;
-const CONTRACT_ID = process.env.NEXT_PUBLIC_TICKET_NFT_CONTRACT_ID;
-const SOROBAN_RPC_URL = process.env.NEXT_PUBLIC_SOROBAN_RPC_URL;
 
 export async function POST(request) {
   try {
     const requestText = await request.text();
     const body = JSON.parse(requestText);
 
-    if (!body || !body.userPublicKey || !body.metadata || !body.image) {
+    if (!body || !body.userPublicKey || !body.metadataURL) {
       return NextResponse.json(
         { error: "Missing required parameters" },
         { status: 400 }
       );
     }
 
-    const { userPublicKey, metadata, image } = body;
+    const { userPublicKey, metadataURL } = body;
 
-    const adminKeypair = Keypair.fromSecret(ADMIN_SECRET_KEY);
-    const server = new StellarRpc.Server(SOROBAN_RPC_URL);
-    const contractAddress = CONTRACT_ID;
-    const contract = new Contract(contractAddress);
+    const issuerKeypair = Keypair.fromSecret(ADMIN_SECRET_KEY);
+    console.log(`Issuer Public Key: ${issuerKeypair.publicKey()}`);
 
-    const sourceAccount = await server.getAccount(adminKeypair.publicKey());
-    const userPublicKeyScVal = new StellarSdk.Address(userPublicKey).toScVal();
+    const nftAsset = new Asset("TBF", issuerKeypair.publicKey());
 
-    const metadataScVal = StellarSdk.xdr.ScVal.scvString(metadata);
-    const imageScVal = StellarSdk.xdr.ScVal.scvString(image);
+    const server = new Horizon.Server("https://horizon-testnet.stellar.org");
+    const account = await server.loadAccount(issuerKeypair.publicKey());
+    const metadataCID = extractCIDFromURL(metadataURL);
 
-    let builtTransaction = new TransactionBuilder(sourceAccount, {
+    // Build a transaction that mints the NFT.
+    let transaction = new TransactionBuilder(account, {
       fee: BASE_FEE,
       networkPassphrase: Networks.TESTNET,
     })
+      // Add the NFT metadata to the issuer account using a `manageData` operation.
       .addOperation(
-        contract.call("mint", userPublicKeyScVal, metadataScVal, imageScVal)
+        Operation.manageData({
+          name: "ipfshash",
+          value: metadataCID,
+          source: issuerKeypair.publicKey(),
+        })
+      )
+      // Begin sponsoring future reserves for the user
+      .addOperation(
+        Operation.beginSponsoringFutureReserves({
+          sponsoredId: userPublicKey,
+          source: issuerKeypair.publicKey(),
+        })
+      )
+      // Create trustline (this will be sponsored)
+      .addOperation(
+        Operation.changeTrust({
+          asset: nftAsset,
+          limit: "0.0000001",
+          source: userPublicKey,
+        })
+      )
+      // End the sponsorship
+      .addOperation(
+        Operation.endSponsoringFutureReserves({
+          source: userPublicKey,
+        })
+      )
+      // Send the NFT to the user
+      .addOperation(
+        Operation.payment({
+          destination: userPublicKey,
+          asset: nftAsset,
+          amount: "0.0000001",
+          source: issuerKeypair.publicKey(),
+        })
       )
       .setTimeout(30)
       .build();
 
-    let preparedTransaction = await server.prepareTransaction(builtTransaction);
-    preparedTransaction.sign(adminKeypair);
+    transaction.sign(issuerKeypair);
+    const transactionXDR = transaction.toXDR();
 
-    let sendResponse = await server.sendTransaction(preparedTransaction);
-
-    if (sendResponse.status === "PENDING") {
-      let getResponse = await server.getTransaction(sendResponse.hash);
-      while (getResponse.status === "NOT_FOUND") {
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        getResponse = await server.getTransaction(sendResponse.hash);
-      }
-
-      if (getResponse.status === "SUCCESS") {
-        const parsedEvents = parseTransactionEvents(getResponse.resultMetaXdr);
-        console.log("Parsed events:", JSON.stringify(parsedEvents, null, 2));
-
-        let tokenId = findTokenIdInMintEvent(parsedEvents);
-        if (tokenId === null) {
-          tokenId = 1;
-          console.log(
-            "Token ID not found in events, using default value:",
-            tokenId
-          );
-        } else {
-          console.log("Found token ID in events:", tokenId);
-        }
-
-        console.log("tokenId", tokenId);
-
-        return NextResponse.json({
-          success: true,
-          tokenId: tokenId,
-          mintTransaction: sendResponse.hash,
-        });
-      } else {
-        throw new Error(`Mint transaction failed: ${getResponse.resultXdr}`);
-      }
-    } else {
-      throw new Error(sendResponse.errorResultXdr);
-    }
+    return NextResponse.json({
+      success: true,
+      assetCode: "TBF",
+      issuer: issuerKeypair.publicKey(),
+      transactionXDR: transactionXDR,
+      metadata: metadataURL,
+      metadataCID: metadataCID,
+    });
   } catch (error) {
-    console.error("Error in minting and transferring ticket:", error);
+    console.error("Error in minting NFT ticket:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to mint and transfer ticket" },
+      { error: error.message || "Failed to mint NFT ticket" },
       { status: 500 }
     );
   }

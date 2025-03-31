@@ -7,6 +7,7 @@ import Modal from '@/components/ui/Modal';
 import { request } from '@stacks/connect';
 import ticketNftService from '@/services/ticketNftService';
 import walletService from '@/services/walletService';
+import StellarSdk from 'stellar-sdk';
 
 export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
     const [isProcessing, setIsProcessing] = useState(false);
@@ -91,33 +92,34 @@ export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
         try {
             toast.loading('Minting your ticket NFT...', { id: 'mint-toast' });
 
-            // Prepare metadata and image URLs
-            const metadata = event.metadataUrl || `ipfs://${event.id}`;
-            const image = event.imageUrl || `ipfs://${event.id}/image`;
+            const metadataURL = event.metadataUrl || `ipfs://${event.id}`;
 
             console.log("Enviando para mint:", {
-                metadata,
-                image,
-                recipient
+                metadataURL,
+                userPublicKey: recipient
             });
 
-            // Call the service to request minting via backend with separate metadata and image
-            const tokenId = await ticketNftService.mintTicket({
-                metadata: metadata,
-                image: image,
-                recipient: recipient
+            const result = await ticketNftService.mintTicket({
+                metadataURL: metadataURL,
+                userPublicKey: recipient
             });
+
+            const tokenId = result.assetCode;
 
             setTicketId(tokenId);
-            setMetadataUri(event.metadataUrl || `ipfs://${event.id}`);
+            setMetadataUri(metadataURL);
+
+
 
             toast.success('Ticket minted successfully!', { id: 'mint-toast' });
 
             if (onSuccess) {
                 onSuccess({
                     ticketId: tokenId,
-                    metadataUri: event.metadataUrl || `ipfs://${event.id}`,
-                    transactionId: txId
+                    metadataUri: metadataURL,
+                    transactionId: txId,
+                    assetIssuer: result.issuer,
+                    assetCode: result.assetCode
                 });
             }
 
