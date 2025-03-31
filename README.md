@@ -1,8 +1,10 @@
 # BlockFest - Decentralized Event Ticketing on Stellar
 
-![BlockFest Logo](frontend/public/logo.png)
+<img src="frontend/public/logo.png" alt="BlockFest Logo" width="200"/>
 
 ## Project Overview 🌟
+
+[Watch Demo Video](https://www.veed.io/view/d07dc722-db2d-4993-ba6d-28492323035c)
 
 BlockFest is a decentralized event ticketing platform built on the Stellar blockchain. Our platform addresses the significant challenges in the traditional event ticketing industry, including ticket fraud, scalping, lack of transparency, and limited engagement between event organizers and attendees.
 
@@ -180,8 +182,7 @@ We chose Stellar for BlockFest for several key reasons:
 Our team is new to Stellar development:
 
 - **Previous Projects**: This is our first project utilizing Stellar's capabilities.
-- **Community Involvement**: We are eager to engage more with the Stellar developer community and participate in future hackathons.
-- **Technical Expertise**: We are currently learning about Stellar's transaction model, operations, and best practices.
+- **Community Involvement**: We have participated in events sponsored by Stellar in Brazil in Florianópolis and are eager to engage more with the Stellar developer community and participate in future hackathons.
 
 ## Deployment and Testing Instructions 🚀
 
@@ -276,12 +277,6 @@ For testing the platform, you can use these credentials:
 ## License 📄
 
 BlockFest is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments 🙏
-
-- Stellar Development Foundation for their amazing blockchain platform
-- The open-source community for their invaluable tools and libraries
-- All hackathon organizers and participants for their support and feedback
 
 ## Storage Considerations
 
