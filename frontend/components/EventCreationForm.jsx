@@ -114,9 +114,9 @@ export default function EventCreationForm() {
 
             // Use mock image if no image is selected
             if (!image) {
-                const response = await fetch('/event1.png');
+                const response = await fetch('/event1.jpeg');
                 const blob = await response.blob();
-                const mockImage = new File([blob], 'event1.png', { type: 'image/png' });
+                const mockImage = new File([blob], 'event1.jpeg', { type: 'image/png' });
                 formData.append('image', mockImage);
             } else {
                 formData.append('image', image);

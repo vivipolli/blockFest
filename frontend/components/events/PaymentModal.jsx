@@ -4,10 +4,8 @@ import { useState } from 'react';
 import { useWallet } from '@/hooks/useWallet';
 import { toast } from 'react-hot-toast';
 import Modal from '@/components/ui/Modal';
-import { request } from '@stacks/connect';
 import ticketNftService from '@/services/ticketNftService';
 import walletService from '@/services/walletService';
-import StellarSdk from 'stellar-sdk';
 
 export default function PaymentModal({ isOpen, onClose, event, onSuccess }) {
     const [isProcessing, setIsProcessing] = useState(false);
